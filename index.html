@@ -295,9 +295,13 @@ details.ws .ws-body { padding: 4px 0 12px; }
 .lib-row .linkname { font-weight: 500; }
 .btnlike.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); font-weight: 400; }
 header { position: relative; }
-#dlOffline { position: absolute; top: 24px; right: 16px; font-size: 13px; padding: 5px 12px; }
+#topRight { position: absolute; top: 24px; right: 16px; display: flex; gap: 6px; }
+#topRight button { font-size: 13px; padding: 5px 12px; }
+#syncBtn[data-st=err] { color: var(--ga-chaos); }
+#syncBtn[data-st=out] { border-color: var(--accent); }
 @media (max-width: 700px) {
-  #dlOffline { top: 10px; right: 10px; font-size: 12px; padding: 3px 8px; }
+  #topRight { top: 10px; right: 10px; }
+  #topRight button { font-size: 12px; padding: 3px 8px; }
   header .head-left { padding-top: 30px; }
 }
 /* ---------- Spielbegleiter ---------- */
@@ -369,7 +373,7 @@ header { position: relative; }
     <span id="calcTools"><div class="seg" id="modeSeg"><button data-mode="off">Offensive</button><button data-mode="def">Defensive</button></div>
     <div class="seg" id="phaseSeg" title="Welche Waffen in die Berechnung einfließen"><button data-phase="melee">Nahkampf</button><button data-phase="ranged">Fernkampf</button><button data-phase="all">Alle</button></div>
     <div class="seg" id="normSeg"><button data-norm="0">Absolut</button><button data-norm="1">pro 100 Punkte</button></div></span>
-    <button id="dlOffline" title="Aktuellen Stand als Datei herunterladen und ohne Internet nutzen">⬇ Offline-Version</button>
+    <div id="topRight"><button id="syncBtn" hidden></button><button id="dlOffline" title="Aktuellen Stand als Datei herunterladen und ohne Internet nutzen">⬇ Offline-Version</button></div>
     <div class="seg" id="langSeg" title="Sprache / Language"><button data-lng="de">DE</button><button data-lng="en">EN</button></div>
   </div>
 </header>
@@ -3038,7 +3042,7 @@ async function offerFile(filename, text) {
     document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); return true;
   } catch { openListBackup(); return false; }
 }
-const dbExportText = () => JSON.stringify({ app: 'aos-rechner', kind: 'lists', exported: new Date().toISOString(), lists: lists.map(x => clone(x)) }, null, 1);
+const dbExportText = () => JSON.stringify({ app: 'aos-rechner', kind: 'lists', exported: new Date().toISOString(), lists: lists.map(x => clone(x)), games: (typeof games !== 'undefined' ? games : []).map(x => clone(x)) }, null, 1);
 blEl('builderView').addEventListener('click', e => {
   const o = e.target.closest('[data-libopen]'), d = e.target.closest('[data-libdel]');
   if (o) { const x = lists.find(y => y.id === o.dataset.libopen); if (x) { ws.bl.side = sideOf(x); ws.bl[sideKey(sideOf(x))] = x.id; saveWs(); renderBuilder(); } }
@@ -3219,7 +3223,7 @@ function openListImport() {
     } }]);
 }
 function openListBackup() {
-  const json = JSON.stringify({ app: 'aos-rechner', lists: lists.map(x => clone(x)) }, null, 1);
+  const json = JSON.stringify({ app: 'aos-rechner', lists: lists.map(x => clone(x)), games: (typeof games !== 'undefined' ? games : []).map(x => clone(x)) }, null, 1);
   const local = location.protocol === 'file:';
   openModal(L('Listen sichern oder übertragen', 'Back up or transfer lists'), `
     <p class="hint">${L(`Enthält alle ${lists.length} Listen. Text kopieren und auf einem anderen Gerät oder in der Offline-Version hier einfügen, dann „Text importieren“. Listen mit gleicher ID werden ersetzt.`, `Contains all ${lists.length} lists. Copy the text and paste it here on another device or in the offline version, then “Import text”. Lists with the same ID are replaced.`)}</p>
@@ -3244,7 +3248,9 @@ function importLists(text) {
     let nu = 0;
     lists = lists.filter(x => !(isDefaultName(x.name) && !x.savedAt && !allEntries(x).length)); // leere Platzhalter-Listen weg
     for (const x of arr) { if (!x || !x.id || !Array.isArray(x.regiments)) continue; const i = lists.findIndex(y => y.id === x.id); if (i >= 0) lists[i] = x; else { lists.push(x); nu++; } n++; }
-    saveLists(); renderBuilder(); toast(L(`${n} Listen importiert (${nu} neu, ${n - nu} aktualisiert)`, `${n} lists imported (${nu} new, ${n - nu} updated)`)); return true;
+    let ng = 0;
+    if (!Array.isArray(d) && Array.isArray(d.games) && typeof games !== 'undefined') { for (const g of d.games) { if (!g || !g.id || !Array.isArray(g.p)) continue; const i = games.findIndex(y => y.id === g.id); if (i >= 0) games[i] = g; else games.push(g); ng++; } if (ng) gmSaveHist(); }
+    saveLists(); renderBuilder(); toast(L(`${n} Listen importiert (${nu} neu, ${n - nu} aktualisiert)`, `${n} lists imported (${nu} new, ${n - nu} updated)`) + (ng ? L(`, ${ng} Spiele`, `, ${ng} games`) : '')); return true;
   } catch { toast(L('Text nicht erkannt.', 'Text not recognised.')); return false; }
 }
 
@@ -3746,6 +3752,197 @@ gmEl('gameView').addEventListener('change', e => {
   else game.rounds[game.round].p[i][k] = Math.max(0, +t.value || 0);
   gmSave(); renderGame();
 });
+
+// ================= Cloud-Sync (optional, nur auf der eigenen Adresse) =================
+// Lokal zuerst: alles bleibt im Browser gespeichert; nach Google-Anmeldung werden Listen, Spiele, laufendes Spiel und
+// Einheiten-Bibliothek mit Firestore abgeglichen (users/{uid}/lists|games|state). Jeder Eintrag als JSON-Text mit Zeitstempel,
+// gelöschte Einträge als Grabstein (deleted:true). Konflikte: neuerer Zeitstempel gewinnt.
+const SYNC_CFG = {
+  apiKey: 'AIzaSyB6g4euL5d7ldrvPjecMHOOTnDnYkQPQMc', authDomain: 'aos-app-8d0b7.firebaseapp.com', projectId: 'aos-app-8d0b7',
+  storageBucket: 'aos-app-8d0b7.firebasestorage.app', messagingSenderId: '406170904957', appId: '1:406170904957:web:186d6e9a56253997484414'
+};
+const SYNC_SDK = 'https://www.gstatic.com/firebasejs/12.19.0/';
+const SYNC_HOST = /(^|\.)github\.io$|^localhost$|^127\.0\.0\.1$/;
+const syncAvailable = () => !!window.__syncMock || (/^https?:$/.test(location.protocol) && SYNC_HOST.test(location.hostname));
+const SY_COLL = {
+  lists: { get: () => lists, set: v => { lists = v; }, key: 'aos2-lists' },
+  games: { get: () => games, set: v => { games = v; }, key: 'aos2-games' }
+};
+const SY_BLOB = {
+  game: { get: () => game, set: v => { game = v; }, key: 'aos2-game' },
+  // Einheiten-Bibliothek: bei Konflikt zusammenführen (nach Name), statt eine Seite zu verwerfen
+  lib: { get: () => library, set: v => { library = v; }, key: 'aos2-lib', merge: (a, b) => { const out = (b || []).slice(), names = new Set(out.map(x => x && x.name)); for (const x of a || []) if (x && !names.has(x.name)) out.push(x); return out; } }
+};
+const SY_KEYS = new Map([...Object.values(SY_COLL).map(d => [d.key, 'c']), ...Object.entries(SY_BLOB).map(([k, d]) => [d.key, k])]);
+const SY = { be: null, user: null, state: 'off', last: 0, err: '', timer: 0, applying: false, unsub: [], ready: new Set(), meta: store.get('aos2-sync', null) };
+if (SY.meta) { SY.meta.coll = SY.meta.coll || {}; SY.meta.blob = SY.meta.blob || {}; SY.meta.dirtyAt = SY.meta.dirtyAt || {}; }
+const syHash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36) + s.length.toString(36); };
+const syJson = v => JSON.stringify(clone(v));
+const syMetaSave = () => { const r = SY.applying; SY.applying = true; store.set('aos2-sync', SY.meta); SY.applying = r; };
+function syRaw(key, v) { SY.applying = true; try { store.set(key, v); } finally { SY.applying = false; } }
+// Jede App-Speicherung der synchronisierten Schlüssel stößt einen verzögerten Upload an
+{
+  const set0 = store.set.bind(store);
+  store.set = (k, v) => {
+    const r = set0(k, v);
+    if (!SY.applying && SY_KEYS.has(k)) { const b = SY_KEYS.get(k); if (b !== 'c' && SY.meta) { SY.meta.dirtyAt[b] = Date.now(); syMetaSave(); } syncSoon(); }
+    return r;
+  };
+}
+function syncSoon(ms = 1500) { if (!SY.user) return; clearTimeout(SY.timer); SY.timer = setTimeout(syncPush, ms); }
+
+async function syncPush() {
+  if (!SY.be || !SY.user || SY.ready.size < 3 || SY.pushing) { if (SY.pushing) syncSoon(); return; }  // erst nach dem ersten Abruf aller Sammlungen hochladen
+  const ops = [], commit = [], uid = SY.user.uid, m = SY.meta;
+  for (const [c, d] of Object.entries(SY_COLL)) {
+    const mc = m.coll[c] = m.coll[c] || {}, arr = d.get(), seen = new Set(); let bumped = false;
+    for (const x of arr) {
+      if (!x || !x.id) continue; seen.add(x.id);
+      let j = syJson(x), h = syHash(j); const s = mc[x.id];
+      if (s && !s.del && s.h === h) continue;
+      if (!x.updated || (s && x.updated <= s.u)) { x.updated = Math.max(Date.now(), (s ? s.u : 0) + 1); j = syJson(x); h = syHash(j); bumped = true; }
+      ops.push([c, x.id, { data: j, updated: x.updated, deleted: false }]); commit.push([mc, x.id, { h, u: x.updated }]);
+    }
+    for (const id of Object.keys(mc)) if (!seen.has(id) && !mc[id].del) { const u = Math.max(Date.now(), mc[id].u + 1); ops.push([c, id, { data: '', updated: u, deleted: true }]); commit.push([mc, id, { h: '', u, del: true }]); }
+    if (bumped) syRaw(d.key, arr);
+  }
+  for (const [k, d] of Object.entries(SY_BLOB)) {
+    const j = syJson(d.get()), h = syHash(j), s = m.blob[k];
+    if (s && s.h === h) continue;
+    const u = Math.max(Date.now(), s ? s.u + 1 : 0);
+    ops.push(['state', k, { data: j, updated: u, deleted: false }]); commit.push([m.blob, k, { h, u }]);
+  }
+  if (!ops.length) { SY.state = 'ok'; SY.last = SY.last || Date.now(); syncUi(); return; }
+  SY.pushing = true; SY.state = navigator.onLine === false ? 'wait' : 'busy'; syncUi();
+  try {
+    await SY.be.write(uid, ops);
+    if (!SY.user || SY.user.uid !== uid) return;
+    for (const [o, id, v] of commit) o[id] = v;
+    syMetaSave(); SY.state = 'ok'; SY.err = ''; SY.last = Date.now();
+  } catch (e) { SY.state = 'err'; SY.err = (e && (e.code || e.message)) || String(e); syncSoon(15000); }
+  finally { SY.pushing = false; syncUi(); }
+}
+
+// Eingehende Daten (alle Dokumente einer Sammlung) einarbeiten
+function syncApply(c, docs) {
+  if (!SY.user) return;
+  SY.ready.add(c);
+  let changed = false;
+  if (c === 'state') { for (const r of docs) changed = syncApplyBlob(r) || changed; }
+  else {
+    const d = SY_COLL[c]; if (!d) return;
+    const mc = SY.meta.coll[c] = SY.meta.coll[c] || {}, arr = d.get().slice();
+    for (const r of docs) {
+      const s = mc[r.id];
+      if (s && s.u === r.updated && !!s.del === !!r.deleted) continue;
+      const i = arr.findIndex(x => x && x.id === r.id), loc = i >= 0 ? arr[i] : null, lh = loc ? syHash(syJson(loc)) : '';
+      const locDirty = loc && (!s || s.del || s.h !== lh);
+      if (r.deleted) {
+        if (loc) { if (locDirty && (loc.updated || 0) > r.updated) continue; arr.splice(i, 1); changed = true; }
+        mc[r.id] = { h: '', u: r.updated, del: true }; continue;
+      }
+      const rh = syHash(r.data || '');
+      if (loc && lh === rh) { mc[r.id] = { h: rh, u: r.updated }; continue; }
+      if (locDirty && (loc.updated || 0) >= r.updated) continue; // lokal neuer → wird hochgeladen
+      let v; try { v = JSON.parse(r.data); } catch { continue; }
+      if (i >= 0) arr[i] = v; else arr.push(v);
+      mc[r.id] = { h: rh, u: r.updated }; changed = true;
+    }
+    if (changed) { d.set(arr); syRaw(d.key, arr); }
+  }
+  syMetaSave();
+  if (changed) syncRerender();
+  syncSoon(400);
+}
+function syncApplyBlob(r) {
+  const d = SY_BLOB[r.id]; if (!d || r.deleted) return false;
+  const m = SY.meta, s = m.blob[r.id];
+  if (s && s.u === r.updated) return false;
+  const lh = syHash(syJson(d.get())), rh = syHash(r.data || '');
+  if (lh === rh) { m.blob[r.id] = { h: rh, u: r.updated }; return false; }
+  const dirty = !s || s.h !== lh;
+  let v; try { v = JSON.parse(r.data); } catch { return false; }
+  if (dirty && d.merge) v = d.merge(d.get(), v);
+  else if (dirty && (m.dirtyAt[r.id] || 0) > r.updated) return false;
+  d.set(v); syRaw(d.key, v); m.blob[r.id] = { h: rh, u: r.updated }; return true;
+}
+function syncRerender() {
+  try { if (!game || !game.rounds) game = gmNew(); } catch {}
+  try { renderLibrary(); } catch {}
+  try { renderView(); } catch {}
+}
+
+function syncStart(user) {
+  SY.unsub.forEach(f => { try { f(); } catch {} }); SY.unsub = [];
+  SY.user = user; SY.ready = new Set();
+  if (!user) { SY.state = 'out'; syncUi(); return; }
+  let m = store.get('aos2-sync', null);
+  if (!m || m.uid !== user.uid) m = { uid: user.uid, coll: {}, blob: {}, dirtyAt: {} };
+  m.coll = m.coll || {}; m.blob = m.blob || {}; m.dirtyAt = m.dirtyAt || {};
+  SY.meta = m; syMetaSave();
+  SY.state = 'busy'; syncUi();
+  for (const c of ['lists', 'games', 'state']) SY.unsub.push(SY.be.listen(user.uid, c, docs => syncApply(c, docs), e => { SY.state = 'err'; SY.err = (e && (e.code || e.message)) || String(e); syncUi(); }));
+}
+
+async function syncLoadFirebase() {
+  const [A, Au, F] = await Promise.all(['firebase-app.js', 'firebase-auth.js', 'firebase-firestore.js'].map(f => import(SYNC_SDK + f)));
+  const app = A.initializeApp(SYNC_CFG), auth = Au.getAuth(app), db = F.getFirestore(app);
+  try { await Au.getRedirectResult(auth); } catch {}
+  return {
+    onUser: cb => Au.onAuthStateChanged(auth, u => cb(u ? { uid: u.uid, email: u.email || '', name: u.displayName || '' } : null)),
+    signIn: async () => {
+      const p = new Au.GoogleAuthProvider(); p.setCustomParameters({ prompt: 'select_account' });
+      try { await Au.signInWithPopup(auth, p); }
+      catch (e) { if (e && /popup-blocked|operation-not-supported/.test(e.code || '')) await Au.signInWithRedirect(auth, p); else throw e; }
+    },
+    signOut: () => Au.signOut(auth),
+    listen: (uid, c, cb, err) => F.onSnapshot(F.collection(db, 'users', uid, c), snap => cb(snap.docs.map(x => ({ id: x.id, ...x.data() }))), err),
+    write: async (uid, ops) => {
+      for (let i = 0; i < ops.length; i += 400) {
+        const b = F.writeBatch(db);
+        for (const [c, id, v] of ops.slice(i, i + 400)) b.set(F.doc(db, 'users', uid, c, id), v);
+        await b.commit();
+      }
+    }
+  };
+}
+
+// ---------- Oberfläche ----------
+function syncUi() {
+  const b = document.getElementById('syncBtn'); if (!b) return;
+  b.hidden = !syncAvailable();
+  const st = !SY.be ? (SY.state === 'err' ? 'err' : 'load') : !SY.user ? 'out' : SY.state;
+  b.dataset.st = st;
+  b.textContent = { load: '☁ …', out: L('☁ Anmelden', '☁ Sign in'), busy: '☁ ⟳', wait: '☁ offline', ok: '☁ ✓', err: '☁ ⚠' }[st] || '☁';
+  b.title = { load: L('Sync wird geladen …', 'Loading sync …'), out: L('Mit Google anmelden, um Listen und Spiele auf allen Geräten zu syncen', 'Sign in with Google to sync lists and games across devices'),
+    busy: L('Synchronisiere …', 'Syncing …'), wait: L('Offline – wird nachgeholt, sobald Internet da ist', 'Offline – will sync once online'), ok: L('Synchronisiert', 'Synced'), err: L('Sync-Fehler', 'Sync error') }[st] || '';
+}
+function syncOpen() {
+  const fmt = t => t ? new Date(t).toLocaleString(LANG === 'en' ? 'en-GB' : 'de-DE') : '–';
+  if (!SY.be) { openModal('Sync', `<p>${SY.state === 'err' ? esc(L('Sync konnte nicht geladen werden (keine Verbindung?). Die App funktioniert normal weiter, alles bleibt lokal gespeichert.', 'Sync could not be loaded (no connection?). The app keeps working, everything stays stored locally.')) + `</p><p class="hint">${esc(SY.err)}` : esc(L('Sync wird noch geladen …', 'Sync is still loading …'))}</p>`, [{ label: 'OK', primary: true }]); return; }
+  if (!SY.user) {
+    openModal(L('Geräte synchronisieren', 'Sync devices'), `<p>${L('Melde dich mit deinem Google-Konto an. Danach werden deine <b>Armeelisten, gespielten Spiele, das laufende Spiel und die Einheiten-Bibliothek</b> automatisch zwischen allen Geräten abgeglichen, auf denen du angemeldet bist.', 'Sign in with your Google account. Your <b>army lists, played games, current game and unit library</b> will then sync automatically between all devices where you are signed in.')}</p>
+      <p class="hint">${L('Deine Daten sind privat: Nur du kannst sie lesen. Ohne Anmeldung funktioniert alles wie bisher, nur lokal auf diesem Gerät. Bereits vorhandene Daten auf diesem Gerät werden beim ersten Anmelden mit deinen Online-Daten zusammengeführt.', 'Your data is private: only you can read it. Without signing in everything works as before, locally on this device. Existing data on this device is merged with your online data when you first sign in.')}</p>`,
+      [{ label: L('Abbrechen', 'Cancel'), cancel: true }, { label: L('Mit Google anmelden', 'Sign in with Google'), primary: true, onClick: () => { SY.be.signIn().catch(e => { if (!/popup-closed|cancelled-popup/.test((e && e.code) || '')) toast(L('Anmeldung fehlgeschlagen: ', 'Sign-in failed: ') + ((e && e.code) || e)); }); } }]);
+    return;
+  }
+  const st = { busy: L('synchronisiere …', 'syncing …'), wait: L('offline – wird nachgeholt', 'offline – will catch up'), ok: L('aktuell', 'up to date'), err: L('Fehler', 'error') + (SY.err ? ': ' + SY.err : '') }[SY.state] || SY.state;
+  openModal(L('Geräte synchronisieren', 'Sync devices'), `<p>${L('Angemeldet als', 'Signed in as')} <b>${esc(SY.user.email || SY.user.name)}</b></p>
+    <p>${L('Status', 'Status')}: ${esc(st)}<br><span class="hint">${L('Zuletzt synchronisiert', 'Last synced')}: ${fmt(SY.last)}</span></p>
+    <p class="hint">${L(`Synchronisiert: ${lists.length} Listen, ${games.length} gespielte Spiele, laufendes Spiel, ${library.length} Einheiten in der Bibliothek. Änderungen werden nach wenigen Sekunden hochgeladen; andere Geräte übernehmen sie automatisch.`, `Synced: ${lists.length} lists, ${games.length} played games, current game, ${library.length} units in the library. Changes upload after a few seconds; other devices pick them up automatically.`)}</p>`,
+    [{ label: L('Abmelden', 'Sign out'), onClick: () => { SY.be.signOut(); toast(L('Abgemeldet – die Daten bleiben auf diesem Gerät.', 'Signed out – data stays on this device.')); } },
+     { label: L('Jetzt synchronisieren', 'Sync now'), onClick: () => { syncPush(); } }, { label: 'OK', primary: true }]);
+}
+(function syncInit() {
+  const b = document.getElementById('syncBtn'); if (!b) return;
+  b.onclick = syncOpen; syncUi();
+  if (!syncAvailable()) return;
+  const be = window.__syncMock ? Promise.resolve(window.__syncMock) : syncLoadFirebase();
+  be.then(x => { SY.be = x; SY.state = 'out'; syncUi(); x.onUser(u => syncStart(u)); })
+    .catch(e => { SY.state = 'err'; SY.err = (e && e.message) || String(e); syncUi(); });
+  window.addEventListener('online', () => syncSoon(200));
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && SY.user) { clearTimeout(SY.timer); syncPush(); } });
+})();
 
 // ================= Start =================
 renderToggles();
