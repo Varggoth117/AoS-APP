@@ -361,6 +361,56 @@ header { position: relative; }
 .dm-row select { flex: 1 1 220px; width: auto; }
 .dm-new { background: color-mix(in srgb, var(--accent) 14%, transparent); padding: 8px 10px; border-radius: 8px; }
 .dm-steps li { margin-bottom: 8px; }
+/* ---------- Turniere ---------- */
+#viewSeg { max-width: calc(100vw - 32px); overflow-x: auto; scrollbar-width: none; }
+.head-left { min-width: 0; max-width: 100%; }
+#viewSeg button { white-space: nowrap; }
+.gm-tourbar { background: color-mix(in srgb, var(--accent) 14%, transparent); border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.tr-list { display: flex; flex-direction: column; gap: 6px; }
+.tr-item { display: flex; flex-direction: column; align-items: flex-start; text-align: left; padding: 8px 10px; width: 100%; }
+.tr-item.on { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+#trSide > .small { margin-bottom: 8px; }
+.tr-head { gap: 10px; }
+.tr-title { font-size: 20px; font-weight: 700; flex: 1; min-width: 0; }
+.tr-head .tag { font-size: 12px; padding: 2px 8px; border-radius: 10px; background: var(--grid); border: 1px solid var(--line); white-space: nowrap; }
+.tr-head .tag.open { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+.tr-settings label { flex: 1 1 140px; }
+.tr-players { display: flex; flex-direction: column; gap: 6px; }
+.tr-prow { display: grid; grid-template-columns: 24px minmax(90px, 1fr) minmax(120px, 1.4fr) minmax(110px, 1fr) auto auto; gap: 6px; align-items: center; }
+.tr-prow.dropped input, .tr-prow.dropped select, tr.dropped { opacity: .5; }
+.tr-no { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.tr-rhead { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; margin: 8px 0; }
+.tr-rhead label { flex: 1 1 220px; }
+.tr-pairs { display: flex; flex-direction: column; gap: 8px; }
+.tr-pair { display: grid; grid-template-columns: 60px 1fr auto auto; gap: 8px; align-items: center; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+.tr-vs { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; min-width: 0; }
+.tr-vs select { flex: 1 1 120px; width: auto; min-width: 0; }
+.tr-vs .win { font-weight: 700; color: var(--accent); }
+.tr-score { font-size: 18px; font-variant-numeric: tabular-nums; }
+.tr-bye { color: var(--muted); font-style: italic; }
+.tr-act { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+.tr-issues { color: var(--ga-chaos); font-size: 14px; margin: 8px 0; }
+.tr-tablewrap { overflow-x: auto; }
+.tr-table td.tr-pl { text-align: left; }
+.tr-quick { display: flex; gap: 10px; align-items: flex-end; }
+.tr-quick label { flex: 1; }
+.tr-quick span { font-size: 22px; padding-bottom: 6px; }
+.tr-foot { margin-top: 14px; }
+@media (max-width: 700px) {
+  .tr-prow { grid-template-columns: 24px 1fr auto auto; }
+  .tr-prow select { grid-column: 2 / -1; }
+  .tr-pair { grid-template-columns: 1fr auto; }
+  .tr-pair .tr-no { grid-column: 1 / -1; }
+  .tr-pair .tr-act { grid-column: 1 / -1; justify-content: flex-start; }
+}
+@media (max-width: 700px) {
+  .tr-prow { grid-template-columns: 24px 1fr auto auto; grid-template-areas: "no name drop del" ". list list list" ". fac fac fac"; }
+  .tr-prow > :nth-child(1) { grid-area: no; } .tr-prow > :nth-child(2) { grid-area: name; } .tr-prow > :nth-child(3) { grid-area: list; }
+  .tr-prow > :nth-child(4) { grid-area: fac; } .tr-prow > :nth-child(5) { grid-area: drop; } .tr-prow > :nth-child(6) { grid-area: del; }
+  .tr-prow select { grid-column: auto; }
+  .tr-prow { padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+  #viewSeg button { padding: 5px 8px; font-size: 14px; }
+}
 </style>
 </head>
 <body>
@@ -368,7 +418,7 @@ header { position: relative; }
 <template id="app-shell">
 <header>
   <div class="head-left">
-    <div class="seg" id="viewSeg" title="Bereich wählen"><button data-view="calc">Rechner</button><button data-view="builder">List Builder</button><button data-view="plans">Battleplans</button><button data-view="game">Spiel</button></div>
+    <div class="seg" id="viewSeg" title="Bereich wählen"><button data-view="calc">Rechner</button><button data-view="builder">List Builder</button><button data-view="plans">Battleplans</button><button data-view="game">Spiel</button><button data-view="tour">Turnier</button></div>
     <div>
       <h1 id="appTitle">Age of Sigmar 4 · Einheitenrechner</h1>
       <p id="appSub">Exakte Schadensverteilungen, effektive Lebenspunkte und direkte Vergleiche.</p>
@@ -579,6 +629,12 @@ header { position: relative; }
     <aside class="panel" id="gmSide"></aside>
   </div>
   <section class="panel" id="gmHist"></section>
+</main>
+<main id="tourView" hidden>
+  <div class="layout tr-layout">
+    <section class="panel" id="trMain"></section>
+    <aside class="panel" id="trSide"></aside>
+  </div>
 </main>
 <div id="rtFoot"><section class="panel" id="dataPanel"></section><section class="panel" id="rtPanel"></section></div>
 <div id="modal" class="modal" hidden>
@@ -1910,7 +1966,11 @@ function mergeUnits(data, norm, src, meta) {
     old.keywords = nu.keywords;
     if (nu.unitNote != null && nu.unitNote !== old.unitNote) old.unitNote = nu.unitNote;
     // Listenbau-Daten kommen immer aus der Quelle
-    if (nu.noReinforce !== undefined || src.id === 'bsdata') { const was = !old.noReinforce && !/Kann nicht verstärkt|cannot be reinforced/i.test(old.unitNote || ''); if (old.def.models > 1 && was === !!nu.noReinforce) { diffs.push(nu.noReinforce ? 'nicht mehr verstärkbar' : 'jetzt verstärkbar'); } if (nu.noReinforce) old.noReinforce = true; else delete old.noReinforce; }
+    if (nu.noReinforce !== undefined || src.id === 'bsdata') {
+      const was = !old.noReinforce && !/Kann nicht verstärkt|cannot be reinforced/i.test(old.unitNote || ''), now = !nu.noReinforce;
+      if (old.def.models > 1 && was !== now && src.conservative && now) rep.check.push(`${old.name}: laut Quelle verstärkbar, bisher nicht – nicht übernommen`);
+      else { if (old.def.models > 1 && was !== now) diffs.push(now ? 'jetzt verstärkbar' : 'nicht mehr verstärkbar'); if (nu.noReinforce) old.noReinforce = true; else delete old.noReinforce; }
+    }
     for (const k of ['regimentOptions', 'joinAs', 'baseSize', 'unitSize']) {
       if (nu[k] !== undefined && JSON.stringify(nu[k]) !== JSON.stringify(old[k])) { if (old[k] !== undefined && k === 'regimentOptions') diffs.push('Regimentsoptionen geändert'); old[k] = nu[k]; }
     }
@@ -1937,23 +1997,51 @@ function keepTexts(oldList, newList) {
     return r;
   });
 }
-function mergeFactionRules(rules, facName, nf, rep) {
+// Wie keepTexts, aber auch verschachtelt (abilities/items): eigene Kurzfassungen bleiben bei jeder Ebene erhalten
+function keepRich(oldList, newList) {
+  const by = new Map((oldList || []).map(a => [srcKey(a.name), a]));
+  return (newList || []).map(a => {
+    const o = by.get(srcKey(a.name)); if (!o) return a;
+    const r = { ...a };
+    for (const k of ['text', 'text_en', 'timing_en']) if (o[k] && (!a[k] || a[k] === STUB)) r[k] = o[k];
+    if (Array.isArray(a.abilities)) r.abilities = keepRich(o.abilities, a.abilities);
+    if (Array.isArray(a.items)) r.items = keepRich(o.items, a.items);
+    return r;
+  });
+}
+function keepTables(oldT, newT) { const seen = {}; return (newT || []).map(t => { const k = t.id || srcKey(t.name), n = (seen[k] = (seen[k] || 0) + 1) - 1, same = (oldT || []).filter(x => x.id === t.id || srcKey(x.name) === srcKey(t.name)), o = same[n] || same[0]; return { ...t, items: keepRich(o && o.items, t.items) }; }); }
+function keepLores(oldL, newL) {
+  const out = {};
+  for (const [k, v] of Object.entries(newL || {})) { const ol = (oldL || {})[k] || [], seen = {};
+    out[k] = (v || []).map(l => { const key = srcKey(l.name), n = (seen[key] = (seen[key] || 0) + 1) - 1, same = ol.filter(x => srcKey(x.name) === key), o = same[n] || same[0];
+      return o ? { ...l, items: keepRich(o.items, l.items) } : l; }); }
+  return out;
+}
+function mergeFactionRules(rules, facName, nf, rep, check) {
   const of = rules.factions[facName] || {};
   const out = { ...of, source: nf.source || of.source };
   const cnt = (a, b) => { const n = (b || []).length, o = (a || []).length; return n === o ? '' : ` (${o} → ${n})`; };
   const note = (lbl, a, b) => { const na = new Set((a || []).map(x => srcKey(x.name))), nb = new Set((b || []).map(x => srcKey(x.name)));
     const add = (b || []).filter(x => !na.has(srcKey(x.name))).map(x => x.name), del = (a || []).filter(x => !nb.has(srcKey(x.name))).map(x => x.name);
     if (add.length || del.length) rep.push(`${facName} · ${lbl}${cnt(a, b)}${add.length ? ': neu ' + add.join(', ') : ''}${del.length ? '; entfernt ' + del.join(', ') : ''}`); };
-  if (nf.battleTraits) { note('Battle Traits', of.battleTraits, nf.battleTraits); out.battleTraits = keepTexts(of.battleTraits, nf.battleTraits); }
+  if (nf.battleTraits) {
+    out.battleTraits = keepRich(of.battleTraits, nf.battleTraits);
+    // Vorsichtiger Modus: von Hand ergänzte Battle Traits, die in der Quelle fehlen, bleiben erhalten
+    const miss = nf.conservative ? (of.battleTraits || []).filter(o => !nf.battleTraits.some(x => srcKey(x.name) === srcKey(o.name))) : [];
+    if (miss.length) { out.battleTraits.push(...miss); (check || rep).push(`${facName} · Battle Traits nicht in der Quelle (bleiben): ${miss.map(x => x.name).join(', ')}`); }
+    else note('Battle Traits', of.battleTraits, nf.battleTraits);
+  }
   if (nf.formations) {
     note('Kampfformationen', of.formations, nf.formations);
     out.formations = nf.formations.map(f => { const o = (of.formations || []).find(x => srcKey(x.name) === srcKey(f.name)); return { ...f, abilities: keepTexts(o && o.abilities, f.abilities) }; });
   }
   if (nf.enhancementTables) {
+    const seenT = {};
     out.enhancementTables = nf.enhancementTables.map(t => {
-      const o = (of.enhancementTables || []).find(x => x.id === t.id || srcKey(x.name) === srcKey(t.name));
+      const k = t.id || srcKey(t.name), n = (seenT[k] = (seenT[k] || 0) + 1) - 1, same = (of.enhancementTables || []).filter(x => x.id === t.id || srcKey(x.name) === srcKey(t.name)), o = same[n] || same[0]; // gleichnamige Tabellen der Reihe nach
       note(t.name, o && o.items, t.items);
-      return { ...t, items: t.items.map(it => { const oi = o && o.items.find(x => srcKey(x.name) === srcKey(it.name));
+      const seenI = {};
+      return { ...t, items: t.items.map(it => { const ki = srcKey(it.name), ni = (seenI[ki] = (seenI[ki] || 0) + 1) - 1, sameI = o ? o.items.filter(x => srcKey(x.name) === ki) : [], oi = sameI[ni] || sameI[0];
         if (oi && oi.points != null && it.points != null && +oi.points !== +it.points) rep.push(`${facName} · ${it.name}: Punkte ${oi.points} → ${it.points}`);
         return { ...it, abilities: keepTexts(oi && oi.abilities, it.abilities) }; }) };
     });
@@ -1963,13 +2051,28 @@ function mergeFactionRules(rules, facName, nf, rep) {
     for (const k of ['spell', 'prayer', 'manifestation']) {
       const nl = nf.lores[k] || [], ol = (of.lores || {})[k] || [];
       note({ spell: 'Zauberlehren', prayer: 'Gebetslehren', manifestation: 'Manifestationslehren' }[k], ol, nl);
-      out.lores[k] = nl.map(l => { const o = ol.find(x => srcKey(x.name) === srcKey(l.name));
+      const seen = {};
+      out.lores[k] = nl.map(l => { const key = srcKey(l.name), n = (seen[key] = (seen[key] || 0) + 1) - 1, same = ol.filter(x => srcKey(x.name) === key), o = same[n] || same[0]; // gleichnamige Lehren der Reihe nach zuordnen
         if (o && o.points != null && l.points != null && +o.points !== +l.points) rep.push(`${facName} · ${l.name}: Punkte ${o.points} → ${l.points}`);
+        if (o) note(l.name, o.items, l.items);
         return { ...l, items: keepTexts(o && o.items, l.items) }; });
     }
   }
-  if (nf.terrain) { note('Fraktionsterrain', of.terrain, nf.terrain); out.terrain = keepTexts(of.terrain, nf.terrain); }
-  if (nf.armiesOfRenown) { note('Armies of Renown', of.armiesOfRenown, nf.armiesOfRenown); out.armiesOfRenown = nf.armiesOfRenown; }
+  if (nf.terrain) { note('Fraktionsterrain', of.terrain, nf.terrain); out.terrain = keepRich(of.terrain, nf.terrain); }
+  if (nf.armiesOfRenown) {
+    note('Armies of Renown', of.armiesOfRenown, nf.armiesOfRenown);
+    out.armiesOfRenown = nf.armiesOfRenown.map(a => {
+      const o = (of.armiesOfRenown || []).find(x => srcKey(x.name) === srcKey(a.name)); if (!o) return a;
+      const r = { ...a };
+      for (const k of ['text', 'text_en']) if (o[k] && !a[k]) r[k] = o[k];
+      if (a.battleTraits) r.battleTraits = keepRich(o.battleTraits, a.battleTraits);
+      if (a.formations) r.formations = keepRich(o.formations, a.formations);
+      if (a.enhancementTables) r.enhancementTables = keepTables(o.enhancementTables, a.enhancementTables);
+      if (a.lores) r.lores = keepLores(o.lores, a.lores);
+      if (a.terrain) r.terrain = keepRich(o.terrain, a.terrain);
+      return r;
+    });
+  }
   rules.factions[facName] = out;
 }
 function mergeRoR(rules, list, rep) {
@@ -1995,6 +2098,24 @@ function mergeTactics(rules, list, rep) {
 }
 
 // Datei einlesen → Vorschau → Übernehmen (für jede Quelle gleich)
+// Datei(en) einer Quelle einlesen und mit dem aktuellen Stand zusammenführen – ohne Oberfläche (auch für das Update-Skript)
+async function dataImport(files, srcId) {
+  let src = DataSources.get(srcId || ''), text = null;
+  if (!src) src = DataSources.list.find(s => s.binary && s.detect('', files[0].name)) || null;
+  if (!src || !src.parseFiles) text = await files[0].text();
+  if (!src) src = DataSources.detect(text);
+  if (!src) throw new Error('Quelle nicht erkannt');
+  const parsed = src.parseFiles ? await src.parseFiles(files) : src.parse(text);
+  const data = clone(sharedView()), rules = clone(rulesView());
+  const rep = mergeUnits(data, parsed.units || [], src, parsed.meta);
+  rep.rules = [];
+  for (const [fn, fr] of Object.entries(parsed.factions || {})) if (data.factions.some(x => x.name === fn)) mergeFactionRules(rules, fn, { ...fr, source: src.id, conservative: !!src.conservative }, rep.rules, rep.check);
+  if (parsed.regimentsOfRenown) mergeRoR(rules, parsed.regimentsOfRenown, rep.rules);
+  if (parsed.battleTactics) mergeTactics(rules, parsed.battleTactics, rep.rules);
+  rules.sources = { ...(rules.sources || {}), [src.id]: { label: src.label, dataVersion: parsed.meta && parsed.meta.dataVersion || '', updated: new Date().toISOString().slice(0, 10) } };
+  data.units.sort(byName);
+  return { src, parsed, data, rules, rep };
+}
 function openDataUpdate() {
   let result = null;
   const srcOpts = DataSources.list.map(s => `<option value="${s.id}">${esc(s.label)}</option>`).join('');
@@ -2019,20 +2140,9 @@ function openDataUpdate() {
     if (!files.length) return;
     out.innerHTML = '<p class="hint">Wird gelesen …</p>';
     try {
-      let src = DataSources.get(document.getElementById('duSrc').value), text = null;
-      if (!src) src = DataSources.list.find(s => s.binary && s.detect('', files[0].name)) || null;
-      if (!src || !src.parseFiles) text = await files[0].text();
-      if (!src) src = DataSources.detect(text);
-      if (!src) throw new Error('Quelle nicht erkannt');
-      const parsed = src.parseFiles ? await src.parseFiles(files) : src.parse(text);
-      const data = clone(sharedView()), rules = clone(rulesView());
-      const rep = mergeUnits(data, parsed.units || [], src, parsed.meta);
-      rep.rules = [];
-      for (const [fn, fr] of Object.entries(parsed.factions || {})) if (data.factions.some(x => x.name === fn)) mergeFactionRules(rules, fn, { ...fr, source: src.id }, rep.rules);
-      if (parsed.regimentsOfRenown) mergeRoR(rules, parsed.regimentsOfRenown, rep.rules);
-      if (parsed.battleTactics) mergeTactics(rules, parsed.battleTactics, rep.rules);
-      rules.sources = { ...(rules.sources || {}), [src.id]: { label: src.label, dataVersion: parsed.meta && parsed.meta.dataVersion || '', updated: new Date().toISOString().slice(0, 10) } };
-      result = { data, rules, rep };
+      const r = await dataImport(files, document.getElementById('duSrc').value);
+      const { src, parsed, rep } = r;
+      result = r;
       const list = (title, items, fmt = esc) => items.length ? `<details${items.length <= 15 ? ' open' : ''}><summary>${title} (${items.length})</summary><ul>${items.map(x => `<li>${fmt(x)}</li>`).join('')}</ul></details>` : '';
       out.innerHTML = `<p>Quelle: <b>${esc(src.label)}</b>${parsed.meta && parsed.meta.dataVersion ? ' · Datenversion ' + esc(parsed.meta.dataVersion) : ''} · <b>${(parsed.units || []).length}</b> Einheiten, <b>${Object.keys(parsed.factions || {}).length}</b> Fraktionen mit Regeln gelesen.${!rep.changed.length && !rep.added.length && !rep.rules.length ? ' Alles ist schon aktuell.' : ''}</p>`
         + list('Geändert', rep.changed, c => `<b>${esc(c.name)}</b>: ${esc(c.diffs.join('; '))}`)
@@ -2514,7 +2624,7 @@ const L = (de, en) => LANG === 'en' ? en : de;
 let lists = (store.get('aos2-lists', []) || []).filter(l => l && l.id);
 const saveLists = () => store.set('aos2-lists', lists); // gibt false zurück, wenn der Browser nicht speichern kann
 ws.bl = ws.bl || {};
-ws.view = ['builder', 'plans', 'game'].includes(ws.view) ? ws.view : 'calc';
+ws.view = ['builder', 'plans', 'game', 'tour'].includes(ws.view) ? ws.view : 'calc';
 
 const kwSet = u => new Set((u && u.keywords || []).map(normKw));
 const isHero = u => kwSet(u).has('hero');
@@ -2833,13 +2943,15 @@ function renderView() {
   const v = ws.view, T = { calc: [L('Age of Sigmar 4 · Einheitenrechner', 'Age of Sigmar 4 · Unit Calculator'), L('Exakte Schadensverteilungen, effektive Lebenspunkte und direkte Vergleiche.', 'Exact damage distributions, effective health and head-to-head comparisons.')],
     builder: ['Age of Sigmar 4 · List Builder', L('Armeelisten nach General’s Handbook bauen, prüfen und direkt im Rechner auswerten.', 'Build and check army lists by the General’s Handbook and analyse them in the calculator.')],
     plans: ['Age of Sigmar 4 · Battleplans', L('Missionen, Saisonregeln und Battle-Tactic-Karten des aktuellen General’s Handbook.', 'Missions, season rules and battle tactic cards of the current General’s Handbook.')],
-    game: [L('Age of Sigmar 4 · Spielbegleiter', 'Age of Sigmar 4 · Game Tracker'), L('Siegpunkte, Battle Tactics und Befehlspunkte Runde für Runde mitzählen.', 'Track victory points, battle tactics and command points round by round.')] }[v] || [];
+    game: [L('Age of Sigmar 4 · Spielbegleiter', 'Age of Sigmar 4 · Game Tracker'), L('Siegpunkte, Battle Tactics und Befehlspunkte Runde für Runde mitzählen.', 'Track victory points, battle tactics and command points round by round.')],
+    tour: [L('Age of Sigmar 4 · Turniere', 'Age of Sigmar 4 · Tournaments'), L('Spieler, Listen, Paarungen und Ergebnisse – Schweizer System oder manuell.', 'Players, lists, pairings and results – Swiss system or manual.')] }[v] || [];
   document.querySelectorAll('#viewSeg button').forEach(x => x.classList.toggle('on', x.dataset.view === v));
-  blEl('calcView').hidden = v !== 'calc'; blEl('builderView').hidden = v !== 'builder'; blEl('plansView').hidden = v !== 'plans'; blEl('gameView').hidden = v !== 'game'; blEl('calcTools').hidden = v !== 'calc';
+  blEl('calcView').hidden = v !== 'calc'; blEl('builderView').hidden = v !== 'builder'; blEl('plansView').hidden = v !== 'plans'; blEl('gameView').hidden = v !== 'game'; blEl('tourView').hidden = v !== 'tour'; blEl('calcTools').hidden = v !== 'calc';
   blEl('appTitle').textContent = T[0]; blEl('appSub').textContent = T[1];
   if (v === 'builder') renderBuilder();
   if (v === 'plans') renderPlans();
   if (v === 'game') renderGame();
+  if (v === 'tour') renderTour();
 }
 blEl('viewSeg').onclick = e => { const v = e.target.dataset.view; if (v && v !== ws.view) { ws.view = v; saveWs(); renderView(); if (v === 'calc') { renderTarget(); compute(); } } };
 
@@ -3049,7 +3161,7 @@ async function offerFile(filename, text) {
     document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); return true;
   } catch { openListBackup(); return false; }
 }
-const dbExportText = () => JSON.stringify({ app: 'aos-rechner', kind: 'lists', exported: new Date().toISOString(), lists: lists.map(x => clone(x)), games: (typeof games !== 'undefined' ? games : []).map(x => clone(x)) }, null, 1);
+const dbExportText = () => JSON.stringify({ app: 'aos-rechner', kind: 'lists', exported: new Date().toISOString(), lists: lists.map(x => clone(x)), games: (typeof games !== 'undefined' ? games : []).map(x => clone(x)), tours: (typeof tours !== 'undefined' ? tours : []).map(x => clone(x)) }, null, 1);
 blEl('builderView').addEventListener('click', e => {
   const o = e.target.closest('[data-libopen]'), d = e.target.closest('[data-libdel]');
   if (o) { const x = lists.find(y => y.id === o.dataset.libopen); if (x) { ws.bl.side = sideOf(x); ws.bl[sideKey(sideOf(x))] = x.id; saveWs(); renderBuilder(); } }
@@ -3257,6 +3369,8 @@ function importLists(text) {
     for (const x of arr) { if (!x || !x.id || !Array.isArray(x.regiments)) continue; const i = lists.findIndex(y => y.id === x.id); if (i >= 0) lists[i] = x; else { lists.push(x); nu++; } n++; }
     let ng = 0;
     if (!Array.isArray(d) && Array.isArray(d.games) && typeof games !== 'undefined') { for (const g of d.games) { if (!g || !g.id || !Array.isArray(g.p)) continue; const i = games.findIndex(y => y.id === g.id); if (i >= 0) games[i] = g; else games.push(g); ng++; } if (ng) gmSaveHist(); }
+    let nt = 0;
+    if (!Array.isArray(d) && Array.isArray(d.tours) && typeof tours !== 'undefined') { for (const x of d.tours) { if (!x || !x.id || !Array.isArray(x.players)) continue; const i = tours.findIndex(y => y.id === x.id); if (i >= 0) tours[i] = x; else tours.push(x); nt++; } if (nt) tourSave(); }
     saveLists(); renderBuilder(); toast(L(`${n} Listen importiert (${nu} neu, ${n - nu} aktualisiert)`, `${n} lists imported (${nu} new, ${n - nu} updated)`) + (ng ? L(`, ${ng} Spiele`, `, ${ng} games`) : '')); return true;
   } catch { toast(L('Text nicht erkannt.', 'Text not recognised.')); return false; }
 }
@@ -3294,7 +3408,7 @@ document.getElementById('mxDef').onchange = e => { ws.mxDef = e.target.value; co
 
 // Englische Texte für die neuen festen Beschriftungen
 Object.assign(EN, {
-  'Rechner': 'Calculator', 'Spiel': 'Game', 'Bereich wählen': 'Choose section', 'Verteidiger': 'Defenders',
+  'Rechner': 'Calculator', 'Spiel': 'Game', 'Turnier': 'Tournament', 'Bereich wählen': 'Choose section', 'Verteidiger': 'Defenders',
   'Daten aktualisieren': 'Update data', 'Quelle': 'Source', 'automatisch erkennen': 'detect automatically',
   '⬇ Offline-Version': '⬇ Offline version', 'Aktuellen Stand als Datei herunterladen und ohne Internet nutzen': 'Download the current state as a file and use it without internet',
   'Übernehmen': 'Apply', 'Abbrechen': 'Cancel', 'Bitte bestätigen': 'Please confirm'
@@ -3671,6 +3785,17 @@ function gmTableHtml() {
   </tbody></table>`;
 }
 
+// Gespeichertes Spiel mit allen Daten für spätere Statistiken (Spieler, Listen, Tactics, Runden im Detail)
+function gmRecord() {
+  const pl = gmPlan();
+  return { id: game.id, date: game.started, rs: game.rs, plan: (pl || {}).name || '', att: game.att, updated: Date.now(),
+    p: game.p.map((p, j) => { const l = lists.find(x => x.id === p.listId) || p.listSnap || null;
+      return { name: gmName(j), faction: p.faction, list: (l && l.name) || p.listName || '', listText: l && l.regiments ? listToText(l) : (p.listText || ''), tactics: p.tactics.filter(Boolean), vp: gmTotal(j),
+        tacDone: game.rounds.flatMap((rd, r) => rd.p[j].tac.map(c => ({ card: c, round: r + 1 }))) }; }),
+    rounds: game.rounds.map((rd, r) => [0, 1].map(j => gmRoundVP(r, j))),
+    detail: game.rounds.map(rd => ({ first: rd.first, p: rd.p.map(x => ({ obj: +x.obj || 0, tac: x.tac.slice(), other: +x.other || 0, cp: +x.cp || 0 })) })),
+    ...(game.tour ? { tour: { id: game.tour.id, name: game.tour.name, round: game.tour.round } } : {}) };
+}
 function gmResultText() {
   const pl = gmPlan(), a = gmTotal(0), b = gmTotal(1);
   const lines = [`${gmRuleset().name}${pl ? ' – ' + pl.name : ''} (${new Date(game.started).toLocaleDateString(LANG === 'en' ? 'en-GB' : 'de-DE')})`,
@@ -3682,7 +3807,7 @@ function gmResultText() {
 function renderGame() {
   if (ws.view !== 'game') return;
   const r = game.round, a = gmTotal(0), b = gmTotal(1), pl = gmPlan(), ud = gmUnderdog(r), rs = gmRuleset();
-  gmEl('gmMain').innerHTML = `${gmSetupHtml()}
+  gmEl('gmMain').innerHTML = `${game.tour ? `<div class="gm-tourbar">🏆 ${L('Turnierspiel', 'Tournament game')}: <b>${esc(game.tour.name)}</b> · ${L('Runde', 'Round')} ${game.tour.round + 1} <button class="small" data-gm="toTour">${L('Zum Turnier', 'To tournament')}</button></div>` : ''}${gmSetupHtml()}
     <div class="gm-score">
       <div class="gm-side${a > b ? ' lead' : ''}"><span>${esc(gmName(0))}</span><b>${a}</b></div>
       <div class="gm-vs">:</div>
@@ -3715,7 +3840,7 @@ function renderGame() {
     ${games.length ? `<div class="gm-hist">${games.slice().sort((x, y) => y.date - x.date).map(g => { const w = g.p[0].vp === g.p[1].vp ? -1 : g.p[0].vp > g.p[1].vp ? 0 : 1;
       return `<div class="gm-hrow"><span class="hint">${new Date(g.date).toLocaleDateString(LANG === 'en' ? 'en-GB' : 'de-DE')}</span>
         <span>${g.p.map((p, i) => `<span class="${w === i ? 'win' : ''}">${esc(p.name)}${p.faction ? ` <span class="hint">(${esc(p.faction)})</span>` : ''} ${p.vp}</span>`).join(' : ')}</span>
-        <span class="hint">${esc(g.plan || '')}</span><button class="icon" data-gm="histDel" data-id="${g.id}" title="${L('Löschen', 'Delete')}">✕</button></div>`; }).join('')}</div>
+        <span class="hint">${g.tour ? '🏆 ' + esc(g.tour.name) + ' R' + (g.tour.round + 1) + ' · ' : ''}${esc(g.plan || '')}</span><button class="icon" data-gm="histDel" data-id="${g.id}" title="${L('Löschen', 'Delete')}">✕</button></div>`; }).join('')}</div>
       ${gmStats()}` : `<p class="hint">${L('Noch keine Spiele gespeichert. „Spiel beenden & speichern“ legt das Ergebnis hier ab.', 'No games saved yet. “Finish & save game” stores the result here.')}</p>`}`;
   document.querySelectorAll('#gameView [data-gm-open]').forEach(d => d.ontoggle = () => { game.open[d.dataset.gmOpen] = d.open; gmSave(); });
 }
@@ -3739,9 +3864,13 @@ gmEl('gameView').addEventListener('click', async e => {
   else if (k === 'text') { const t = gmResultText(); try { await navigator.clipboard.writeText(t); toast(L('Ergebnis kopiert', 'Result copied')); } catch { openModal(L('Ergebnis', 'Result'), `<textarea rows="10" readonly>${esc(t)}</textarea>`, [{ label: 'OK', primary: true }]); } return; }
   else if (k === 'finish') {
     if (!(await askConfirm(L(`Spiel mit ${gmTotal(0)} : ${gmTotal(1)} speichern und neues Spiel beginnen?`, `Save game at ${gmTotal(0)} : ${gmTotal(1)} and start a new one?`), L('Speichern', 'Save')))) return;
-    games.push({ id: game.id, date: game.started, rs: game.rs, plan: (gmPlan() || {}).name || '', p: game.p.map((p, j) => ({ name: gmName(j), faction: p.faction, list: (lists.find(l => l.id === p.listId) || {}).name || '', tactics: p.tactics, vp: gmTotal(j) })), rounds: game.rounds.map((rd, r) => [0, 1].map(j => gmRoundVP(r, j))) });
-    gmSaveHist(); game = gmNew(game); toast(L('Spiel gespeichert', 'Game saved'));
+    const rec = gmRecord(), tref = game.tour;
+    games.push(rec); gmSaveHist();
+    if (tref && typeof tourResultFromGame === 'function') tourResultFromGame(tref, rec);
+    game = gmNew(tref ? null : game); toast(L('Spiel gespeichert', 'Game saved'));
+    if (tref) { gmSave(); ws.view = 'tour'; saveWs(); renderView(); return; }
   }
+  else if (k === 'toTour') { ws.view = 'tour'; saveWs(); renderView(); return; }
   else if (k === 'reset') { if (!(await askConfirm(L('Aktuelles Spiel verwerfen und neu beginnen?', 'Discard the current game and start over?'), L('Neues Spiel', 'New game')))) return; game = gmNew(game); }
   else if (k === 'histDel') { if (!(await askConfirm(L('Dieses Spiel aus der Liste löschen?', 'Delete this game from the list?'), L('Löschen', 'Delete')))) return; games = games.filter(g => g.id !== b.dataset.id); gmSaveHist(); }
   else return;
@@ -3760,6 +3889,263 @@ gmEl('gameView').addEventListener('change', e => {
   gmSave(); renderGame();
 });
 
+// ================= Turniere (fünfter Bereich) =================
+// Turniere in 'aos2-tours' (gesynct). Spieler mit optionaler Liste, Runden mit Battleplan und Paarungen
+// (Schweizer System oder manuell). Ergebnisse landen zusätzlich als normales Spiel in „Gespielte Spiele“ (mit tour-Verweis).
+let tours = (store.get('aos2-tours', []) || []).filter(t => t && t.id);
+const tourSave = () => store.set('aos2-tours', tours);
+const tEl = id => document.getElementById(id);
+ws.tour = ws.tour || {};
+const tCur = () => tours.find(t => t.id === ws.tour.cur) || null;
+const tTouch = t => { t.updated = Date.now(); tourSave(); };
+const tP = (t, id) => t.players.find(p => p.id === id) || null;
+const tName = (t, id) => { const p = tP(t, id); return p ? p.name : L('(gelöscht)', '(deleted)'); };
+const tDate = d => new Date(d).toLocaleDateString(LANG === 'en' ? 'en-GB' : 'de-DE');
+function tNew(name) {
+  return { id: uid(), name, created: Date.now(), updated: Date.now(), status: 'open', rs: rulesetById(null).id, nRounds: 3, scoring: 'wins', players: [], rounds: [], view: { round: 0 } };
+}
+function tPlayerFromList(p, l) {
+  if (!l) { p.listId = ''; p.listName = ''; p.listText = ''; p.tactics = []; return p; }
+  p.listId = l.id; p.listName = l.name; p.faction = l.faction || p.faction; p.tactics = (l.tactics || []).filter(Boolean); p.listText = listToText(l);
+  return p;
+}
+// ---------- Tabelle ----------
+function tStandings(t, upto = t.rounds.length) {
+  const S = new Map(t.players.map(p => [p.id, { id: p.id, played: 0, w: 0, d: 0, l: 0, byes: 0, vp: 0, va: 0, opp: [] }]));
+  t.rounds.slice(0, upto).forEach(rd => rd.pairings.forEach(pr => {
+    if (!pr.res) return;
+    const a = S.get(pr.a), b = pr.b ? S.get(pr.b) : null;
+    if (!a) return;
+    if (pr.b === null) { a.byes++; a.w++; a.played++; return; }
+    if (!b) return;
+    const [x, y] = pr.res.vp.map(v => +v || 0);
+    a.played++; b.played++; a.vp += x; a.va += y; b.vp += y; b.va += x; a.opp.push(b.id); b.opp.push(a.id);
+    if (x > y) { a.w++; b.l++; } else if (y > x) { b.w++; a.l++; } else { a.d++; b.d++; }
+  }));
+  const arr = [...S.values()];
+  arr.forEach(s => { s.pts = s.w + s.d / 2; s.diff = s.vp - s.va; });
+  arr.forEach(s => { s.sos = s.opp.reduce((n, o) => n + (S.get(o) ? S.get(o).pts : 0), 0); });
+  const cmp = t.scoring === 'vp' ? (a, b) => b.vp - a.vp || b.diff - a.diff || b.pts - a.pts
+    : (a, b) => b.pts - a.pts || b.diff - a.diff || b.sos - a.sos || b.vp - a.vp;
+  return arr.sort((a, b) => cmp(a, b) || tName(t, a.id).localeCompare(tName(t, b.id)));
+}
+const tMet = (t, a, b, skip) => t.rounds.some((rd, r) => r !== skip && rd.pairings.some(p => (p.a === a && p.b === b) || (p.a === b && p.b === a)));
+const tHadBye = (t, id, skip) => t.rounds.some((rd, r) => r !== skip && rd.pairings.some(p => p.a === id && p.b === null));
+// Schweizer System: Runde 1 zufällig, danach nach Tabelle; keine Wiederholungen (wenn möglich), Freilos an den Letzten ohne Freilos
+function tSwiss(t, r) {
+  let ids = t.players.filter(p => !p.dropped).map(p => p.id);
+  if (r === 0) { for (let i = ids.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [ids[i], ids[j]] = [ids[j], ids[i]]; } }
+  else { const order = tStandings(t, r).map(s => s.id); ids.sort((a, b) => order.indexOf(a) - order.indexOf(b)); }
+  let bye = null;
+  if (ids.length % 2) { bye = [...ids].reverse().find(id => !tHadBye(t, id, r)) || ids[ids.length - 1]; ids = ids.filter(x => x !== bye); }
+  let steps = 0;
+  const pair = rest => {
+    if (!rest.length) return [];
+    if (++steps > 20000) return null;
+    const [a, ...others] = rest;
+    for (let i = 0; i < others.length; i++) { if (tMet(t, a, others[i], r)) continue; const sub = pair(others.filter((_, j) => j !== i)); if (sub) return [[a, others[i]], ...sub]; }
+    return null;
+  };
+  let res = pair(ids), rematch = false;
+  if (!res) { res = []; for (let i = 0; i < ids.length; i += 2) res.push([ids[i], ids[i + 1]]); rematch = true; }
+  const out = res.map(([a, b]) => ({ id: uid(), a, b, res: null }));
+  if (bye) out.push({ id: uid(), a: bye, b: null, res: { bye: true, vp: [0, 0] } });
+  return { pairings: out, rematch };
+}
+// ---------- Ergebnis eines Spiels übernehmen ----------
+function tGameRecord(t, r, pr, vp) {
+  const pl = [tP(t, pr.a), tP(t, pr.b)];
+  return { id: uid(), date: Date.now(), updated: Date.now(), rs: t.rs, plan: t.rounds[r].plan || '', quick: true,
+    p: pl.map((p, j) => ({ name: p ? p.name : '?', faction: p ? p.faction : '', list: p ? p.listName : '', listText: p ? p.listText : '', tactics: p ? p.tactics : [], vp: +vp[j] || 0 })),
+    tour: { id: t.id, name: t.name, round: r } };
+}
+function tourResultFromGame(ref, rec) {
+  const t = tours.find(x => x.id === ref.id); if (!t) return;
+  const rd = t.rounds[ref.round], pr = rd && rd.pairings.find(p => p.id === ref.pairing); if (!pr) return;
+  if (pr.res && pr.res.gameId && pr.res.gameId !== rec.id) { games = games.filter(g => g.id !== pr.res.gameId); gmSaveHist(); }
+  pr.res = { vp: [rec.p[0].vp, rec.p[1].vp], gameId: rec.id, mode: 'tracker' };
+  ws.tour.cur = t.id; t.view.round = ref.round; tTouch(t);
+  toast(L(`Ergebnis für „${t.name}“, Runde ${ref.round + 1} übernommen`, `Result stored in “${t.name}”, round ${ref.round + 1}`));
+}
+function tQuickResult(t, r, pr) {
+  const a = tP(t, pr.a), b = tP(t, pr.b), v = (pr.res && pr.res.vp) || ['', ''];
+  openModal(L('Ergebnis eintragen', 'Enter result'), `<p>${L('Runde', 'Round')} ${r + 1}${t.rounds[r].plan ? ' · ' + esc(t.rounds[r].plan) : ''}</p>
+    <div class="tr-quick"><label>${esc(a ? a.name : '?')}<input type="number" inputmode="numeric" id="tqA" value="${esc(v[0])}" min="0"></label><span>:</span><label>${esc(b ? b.name : '?')}<input type="number" inputmode="numeric" id="tqB" value="${esc(v[1])}" min="0"></label></div>
+    <p class="hint">${L('Siegpunkte am Spielende. Für Runden, Tactics und Befehlspunkte das Spiel stattdessen mit dem Spielbegleiter erfassen.', 'Victory points at the end of the game. To record rounds, tactics and command points, use the game tracker instead.')}</p>`,
+    [{ label: L('Abbrechen', 'Cancel'), cancel: true }, { label: L('Speichern', 'Save'), primary: true, onClick: () => {
+      const x = document.getElementById('tqA').value, y = document.getElementById('tqB').value;
+      if (x === '' || y === '') { toast(L('Bitte beide Ergebnisse eintragen.', 'Please enter both scores.')); return false; }
+      const old = pr.res && pr.res.gameId && games.find(g => g.id === pr.res.gameId);
+      if (old) { old.p[0].vp = +x; old.p[1].vp = +y; old.updated = Date.now(); }
+      else { const rec = tGameRecord(t, r, pr, [x, y]); games.push(rec); pr.res = { gameId: rec.id }; }
+      gmSaveHist();
+      pr.res = { ...pr.res, vp: [+x, +y], mode: (pr.res && pr.res.mode) || 'quick' }; tTouch(t); renderTour();
+    } }]);
+  setTimeout(() => { const i = document.getElementById('tqA'); if (i) i.focus(); }, 50);
+}
+async function tPlayTracker(t, r, pr) {
+  if (game && game.rounds && (gmTotal(0) + gmTotal(1) > 0) && !(game.tour && game.tour.pairing === pr.id)) {
+    if (!(await askConfirm(L('Im Spielbegleiter läuft noch ein Spiel. Verwerfen und dieses Turnierspiel starten?', 'A game is still running in the tracker. Discard it and start this tournament game?'), L('Starten', 'Start')))) return;
+  } else if (game && game.tour && game.tour.pairing === pr.id) { ws.view = 'game'; saveWs(); renderView(); return; }
+  const g = gmNew(), rs = rulesetById(t.rs), maxT = rs.maxTactics ?? 2;
+  g.rs = t.rs; g.plan = t.rounds[r].plan || ''; g.open = { setup: false };
+  g.p = [pr.a, pr.b].map(id => { const p = tP(t, id) || {}; const l = lists.find(x => x.id === p.listId);
+    return { name: p.name || '?', listId: l ? l.id : '', listName: p.listName || '', listText: p.listText || '', faction: p.faction || '', tactics: (p.tactics || []).slice(0, maxT), fury: 0 }; });
+  g.tour = { id: t.id, name: t.name, round: r, pairing: pr.id };
+  game = g; gmSave(); ws.view = 'game'; saveWs(); renderView();
+}
+// ---------- Darstellung ----------
+function tSideHtml() {
+  const open = tours.filter(t => t.status !== 'done').sort((a, b) => b.updated - a.updated), done = tours.filter(t => t.status === 'done').sort((a, b) => b.created - a.created);
+  const row = t => `<button class="tr-item${ws.tour.cur === t.id ? ' on' : ''}" data-tr="open" data-id="${t.id}"><b>${esc(t.name)}</b><span class="hint">${tDate(t.created)} · ${t.players.length} ${L('Spieler', 'players')} · ${t.status === 'done' ? L('abgeschlossen', 'finished') : L('Runde', 'round') + ' ' + Math.max(1, t.rounds.length) + '/' + t.nRounds}</span></button>`;
+  return `<div class="panel-head"><h2>${L('Turniere', 'Tournaments')}</h2></div>
+    <button class="small primary" data-tr="new">+ ${L('Neues Turnier', 'New tournament')}</button>
+    ${open.length ? `<h3>${L('Laufend', 'Running')}</h3><div class="tr-list">${open.map(row).join('')}</div>` : ''}
+    ${done.length ? `<h3>${L('Abgeschlossen', 'Finished')}</h3><div class="tr-list">${done.map(row).join('')}</div>` : ''}
+    ${!tours.length ? `<p class="hint">${L('Noch keine Turniere. Lege eins an, trage Spieler (optional mit Liste) ein und erzeuge die Paarungen.', 'No tournaments yet. Create one, add players (optionally with a list) and generate the pairings.')}</p>` : ''}`;
+}
+function tPlayersHtml(t, ro) {
+  const facs = sharedView().factions.map(f => f.name).sort();
+  const listOpts = p => `<option value="">${L('– keine Liste –', '– no list –')}</option>` + [...lists].sort((a, b) => a.name.localeCompare(b.name)).map(l => `<option value="${l.id}"${p.listId === l.id ? ' selected' : ''}>${esc(l.name)}${l.faction ? ' · ' + esc(l.faction) : ''}</option>`).join('');
+  return `<details class="abil" data-tr-open="players"${t.view.players !== false ? ' open' : ''}><summary>${L('Spieler', 'Players')} (${t.players.length})</summary><div class="abil-body">
+    ${t.players.length ? `<div class="tr-players">${t.players.map((p, i) => `<div class="tr-prow${p.dropped ? ' dropped' : ''}" data-pid="${p.id}">
+      <span class="tr-no">${i + 1}</span>
+      <input data-tr-in="pname" value="${esc(p.name)}" placeholder="${L('Name', 'Name')}"${ro ? ' disabled' : ''}>
+      <select data-tr-in="plist"${ro ? ' disabled' : ''}>${listOpts(p)}</select>
+      <select data-tr-in="pfac"${ro || p.listId ? ' disabled' : ''}><option value="">${L('– Fraktion –', '– faction –')}</option>${facs.map(f => `<option${f === p.faction ? ' selected' : ''}>${esc(f)}</option>`).join('')}</select>
+      ${ro ? '' : `<button class="icon" data-tr="pdrop" title="${p.dropped ? L('Wieder aufnehmen', 'Re-enter') : L('Aussteigen lassen (keine weiteren Paarungen)', 'Drop (no further pairings)')}">${p.dropped ? '↺' : '⏏'}</button><button class="icon" data-tr="pdel" title="${L('Entfernen', 'Remove')}">✕</button>`}
+    </div>`).join('')}</div>` : `<p class="hint">${L('Noch keine Spieler.', 'No players yet.')}</p>`}
+    ${ro ? '' : `<div class="row-btns"><button class="small" data-tr="padd">+ ${L('Spieler', 'Player')}</button></div>
+    <p class="hint">${L('Listen kommen aus dem List Builder (auch Gegnerlisten). Beim Zuordnen wird ein Abbild gespeichert – spätere Änderungen an der Liste ändern das Turnier nicht.', 'Lists come from the List Builder (opponent lists too). A snapshot is stored when assigned – later edits to the list do not change the tournament.')}</p>`}
+  </div></details>`;
+}
+function tRoundHtml(t, r, ro) {
+  const rd = t.rounds[r], rs = rulesetById(t.rs), plans = (rs.battleplans || []).slice().sort((a, b) => a.order - b.order);
+  const active = t.players.filter(p => !p.dropped);
+  const pOpts = (sel) => `<option value="">–</option>` + t.players.map(p => `<option value="${p.id}"${p.id === sel ? ' selected' : ''}>${esc(p.name)}</option>`).join('');
+  const used = new Map(); rd.pairings.forEach(pr => [pr.a, pr.b].forEach(id => id && used.set(id, (used.get(id) || 0) + 1)));
+  const issues = [...used].filter(([, n]) => n > 1).map(([id]) => L(`${tName(t, id)} ist mehrfach eingeteilt`, `${tName(t, id)} is paired more than once`))
+    .concat(active.filter(p => !used.has(p.id)).map(p => L(`${p.name} ist nicht eingeteilt`, `${p.name} is not paired`)))
+    .concat(rd.pairings.filter(pr => pr.a && pr.b && tMet(t, pr.a, pr.b, r)).map(pr => L(`${tName(t, pr.a)} und ${tName(t, pr.b)} haben schon gegeneinander gespielt`, `${tName(t, pr.a)} and ${tName(t, pr.b)} have already played`)));
+  const rows = rd.pairings.map((pr, i) => {
+    const res = pr.res, bye = pr.b === null;
+    const score = bye ? `<span class="tr-bye">${L('Freilos (Sieg)', 'Bye (win)')}</span>` : res && res.vp ? `<b class="tr-score">${res.vp[0]} : ${res.vp[1]}</b>${res.mode === 'tracker' ? ' <span class="hint" title="' + L('mit Spielbegleiter erfasst', 'recorded with the game tracker') + '">📋</span>' : ''}` : `<span class="hint">${L('offen', 'open')}</span>`;
+    const w = bye ? 0 : res && res.vp ? (res.vp[0] > res.vp[1] ? 0 : res.vp[1] > res.vp[0] ? 1 : -1) : -2;
+    return `<div class="tr-pair" data-prid="${pr.id}">
+      <span class="tr-no">${L('Tisch', 'Table')} ${i + 1}</span>
+      <div class="tr-vs">${!ro && !res ? `<select data-tr-in="pa">${pOpts(pr.a, false)}</select><span>vs</span><select data-tr-in="pb"><option value="">–</option><option value="bye"${bye ? ' selected' : ''}>${L('Freilos', 'Bye')}</option>${t.players.map(p => `<option value="${p.id}"${p.id === pr.b ? ' selected' : ''}>${esc(p.name)}</option>`).join('')}</select>`
+        : `<span class="${w === 0 ? 'win' : ''}">${esc(tName(t, pr.a))}</span><span>vs</span><span class="${w === 1 ? 'win' : ''}">${bye ? L('Freilos', 'Bye') : pr.b ? esc(tName(t, pr.b)) : '–'}</span>`}</div>
+      <div class="tr-res">${score}</div>
+      ${ro || !pr.b || !pr.a ? (ro || pr.b ? '' : `<div class="tr-act"><button class="icon" data-tr="prdel" title="${L('Paarung löschen', 'Delete pairing')}">✕</button></div>`) : `<div class="tr-act">
+        <button class="small" data-tr="play" title="${L('Mit dem Spielbegleiter Runde für Runde erfassen', 'Record round by round with the game tracker')}">▶ ${L('Spielbegleiter', 'Tracker')}</button>
+        <button class="small" data-tr="quick">${res ? L('Ändern', 'Edit') : L('Ergebnis', 'Result')}</button>
+        ${res ? `<button class="icon" data-tr="prclear" title="${L('Ergebnis löschen', 'Clear result')}">↺</button>` : `<button class="icon" data-tr="prdel" title="${L('Paarung löschen', 'Delete pairing')}">✕</button>`}</div>`}
+    </div>`; }).join('');
+  const allDone = rd.pairings.length && rd.pairings.every(pr => pr.res);
+  return `<div class="tr-rhead">
+      <label>Battleplan<select data-tr-in="plan"${ro ? ' disabled' : ''}><option value="">–</option>${plans.map(p => `<option value="${esc(p.name)}"${p.name === rd.plan ? ' selected' : ''}>${p.order}. ${esc(p.name)}</option>`).join('')}</select></label>
+      ${ro ? '' : `<button class="small" data-tr="rollPlan">🎲 ${L('Zufällig', 'Random')}</button>`}
+    </div>
+    ${rd.pairings.length ? `<div class="tr-pairs">${rows}</div>` : `<p class="hint">${L('Noch keine Paarungen für diese Runde.', 'No pairings for this round yet.')}</p>`}
+    ${issues.length && !ro ? `<ul class="tr-issues">${issues.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
+    ${ro ? '' : `<div class="row-btns">
+      ${rd.pairings.some(pr => pr.res && pr.b) ? '' : `<button class="small primary" data-tr="swiss">${rd.pairings.length ? L('Paarungen neu erzeugen', 'Re-generate pairings') : L('Paarungen erzeugen (Schweizer System)', 'Generate pairings (Swiss)')}</button>`}
+      <button class="small" data-tr="pradd">+ ${L('Paarung manuell', 'Manual pairing')}</button>
+      ${allDone && r === t.rounds.length - 1 && t.rounds.length < t.nRounds ? `<button class="small primary" data-tr="nextRound">${L('Nächste Runde', 'Next round')} →</button>` : ''}
+    </div>`}`;
+}
+function tTableHtml(t) {
+  const st = tStandings(t), any = st.some(s => s.played);
+  if (!t.players.length) return '';
+  return `<h3>${L('Tabelle', 'Standings')}</h3><div class="tr-tablewrap"><table class="gm-table tr-table"><thead><tr><th>#</th><th>${L('Spieler', 'Player')}</th><th>${L('S/U/N', 'W/D/L')}</th><th>${L('SP', 'VP')}</th><th>${L('Diff', 'Diff')}</th><th title="${L('Stärke der Gegner (Summe ihrer Punkte)', 'Strength of schedule (sum of opponents’ points)')}">SoS</th></tr></thead><tbody>
+    ${st.map((s, i) => { const p = tP(t, s.id); return `<tr class="${p && p.dropped ? 'dropped' : ''}"><td>${any ? i + 1 : '–'}</td><td class="tr-pl"><b>${esc(p ? p.name : '?')}</b>${p && p.faction ? `<br><span class="hint">${esc(p.faction)}</span>` : ''}</td><td>${s.w}/${s.d}/${s.l}${s.byes ? '*' : ''}</td><td>${s.vp}</td><td>${s.diff > 0 ? '+' : ''}${s.diff}</td><td>${s.sos}</td></tr>`; }).join('')}
+  </tbody></table></div><p class="hint">${t.scoring === 'vp' ? L('Wertung: Siegpunkte, dann Differenz.', 'Scoring: victory points, then difference.') : L('Wertung: Siege (Unentschieden = ½), dann Siegpunkte-Differenz, dann Stärke der Gegner (SoS).', 'Scoring: wins (draw = ½), then VP difference, then strength of schedule (SoS).')}${st.some(s => s.byes) ? ' ' + L('* inkl. Freilos.', '* incl. bye.') : ''}</p>`;
+}
+function tResultText(t) {
+  const st = tStandings(t);
+  const lines = [`${t.name} (${tDate(t.created)})${t.status === 'done' ? '' : ' – ' + L('läuft', 'running')}`, ''];
+  st.forEach((s, i) => { const p = tP(t, s.id); lines.push(`${i + 1}. ${p ? p.name : '?'}${p && p.faction ? ' (' + p.faction + ')' : ''} – ${s.w}/${s.d}/${s.l}, ${s.vp} ${L('SP', 'VP')}, Diff ${s.diff > 0 ? '+' : ''}${s.diff}`); });
+  t.rounds.forEach((rd, r) => { lines.push('', `${L('Runde', 'Round')} ${r + 1}${rd.plan ? ' – ' + rd.plan : ''}`);
+    rd.pairings.forEach(pr => lines.push(pr.b ? `  ${tName(t, pr.a)} ${pr.res && pr.res.vp ? pr.res.vp[0] + ' : ' + pr.res.vp[1] : '–'} ${tName(t, pr.b)}` : `  ${tName(t, pr.a)} – ${L('Freilos', 'bye')}`)); });
+  return lines.join('\n');
+}
+function renderTour() {
+  if (ws.view !== 'tour') return;
+  tEl('trSide').innerHTML = tSideHtml();
+  const t = tCur();
+  if (!t) { tEl('trMain').innerHTML = `<div class="panel-head"><h2>${L('Turnier', 'Tournament')}</h2></div><p class="hint">${L('Links ein Turnier wählen oder ein neues anlegen.', 'Pick a tournament on the left or create a new one.')}</p>`; return; }
+  const ro = t.status === 'done', rs = rulesetById(t.rs);
+  t.view = t.view || { round: 0 };
+  const r = Math.min(t.view.round || 0, Math.max(0, t.rounds.length - 1));
+  tEl('trMain').innerHTML = `<div class="panel-head tr-head">
+      ${ro ? `<h2>${esc(t.name)}</h2>` : `<input class="tr-title" data-tr-in="name" value="${esc(t.name)}" aria-label="${L('Name des Turniers', 'Tournament name')}">`}
+      <span class="tag ${ro ? '' : 'open'}">${ro ? L('abgeschlossen', 'finished') : L('läuft', 'running')}</span></div>
+    <div class="gm-setrow tr-settings">
+      <label>${L('Runden', 'Rounds')}<select data-tr-in="nRounds"${ro ? ' disabled' : ''}>${[1, 2, 3, 4, 5, 6, 7, 8].map(n => `<option${n === t.nRounds ? ' selected' : ''}${n < t.rounds.length ? ' disabled' : ''}>${n}</option>`).join('')}</select></label>
+      <label>${L('Wertung', 'Scoring')}<select data-tr-in="scoring"${ro ? ' disabled' : ''}><option value="wins"${t.scoring !== 'vp' ? ' selected' : ''}>${L('Siege, dann SP-Differenz', 'Wins, then VP difference')}</option><option value="vp"${t.scoring === 'vp' ? ' selected' : ''}>${L('Siegpunkte', 'Victory points')}</option></select></label>
+      ${rulesView().rulesets.length > 1 ? `<label>${L('Regelwerk', 'Ruleset')}<select data-tr-in="rs"${ro ? ' disabled' : ''}>${rulesView().rulesets.map(x => `<option value="${esc(x.id)}"${x.id === rs.id ? ' selected' : ''}>${esc(x.name)}</option>`).join('')}</select></label>` : ''}
+    </div>
+    ${tPlayersHtml(t, ro)}
+    <h3>${L('Runden', 'Rounds')}</h3>
+    ${t.rounds.length ? `<div class="gm-rounds"><div class="seg">${t.rounds.map((rd, k) => `<button data-tr="round" data-r="${k}" class="${k === r ? 'on' : ''}">${L('Runde', 'Round')} ${k + 1}${rd.pairings.length && rd.pairings.every(p => p.res) ? ' ✓' : ''}</button>`).join('')}</div></div>${tRoundHtml(t, r, ro)}`
+      : `<p class="hint">${t.players.length < 2 ? L('Mindestens zwei Spieler eintragen, dann die erste Runde starten.', 'Add at least two players, then start the first round.') : ''}</p>${ro ? '' : `<button class="small primary" data-tr="startRound"${t.players.length < 2 ? ' disabled' : ''}>${L('Runde 1 starten', 'Start round 1')}</button>`}`}
+    ${tTableHtml(t)}
+    <div class="row-btns tr-foot">
+      ${ro ? `<button class="small" data-tr="reopen">${L('Wieder öffnen', 'Re-open')}</button>` : `<button class="small primary" data-tr="finish">${L('Turnier abschließen', 'Finish tournament')}</button>`}
+      <button class="small" data-tr="text">${L('Ergebnisse als Text', 'Results as text')}</button>
+      <button class="small" data-tr="del">${L('Turnier löschen', 'Delete tournament')}</button>
+    </div>`;
+  document.querySelectorAll('#tourView [data-tr-open]').forEach(d => d.ontoggle = () => { t.view[d.dataset.trOpen] = d.open; tourSave(); });
+}
+tEl('tourView').addEventListener('click', async e => {
+  const b = e.target.closest('[data-tr]'); if (!b) return;
+  const k = b.dataset.tr, t = tCur();
+  if (k === 'new') { const n = await askName(L('Neues Turnier', 'New tournament'), L('Turnier ', 'Tournament ') + new Date().toLocaleDateString(LANG === 'en' ? 'en-GB' : 'de-DE')); if (!n) return; const x = tNew(n); tours.push(x); ws.tour.cur = x.id; saveWs(); tTouch(x); renderTour(); return; }
+  if (k === 'open') { ws.tour.cur = b.dataset.id; saveWs(); renderTour(); return; }
+  if (!t) return;
+  const prEl = b.closest('[data-prid]'), pEl = b.closest('[data-pid]'), r = Math.min(t.view.round || 0, Math.max(0, t.rounds.length - 1)), rd = t.rounds[r];
+  const pr = prEl && rd ? rd.pairings.find(x => x.id === prEl.dataset.prid) : null, p = pEl ? tP(t, pEl.dataset.pid) : null;
+  if (k === 'padd') { t.players.push({ id: uid(), name: L('Spieler ', 'Player ') + (t.players.length + 1), faction: '', listId: '', listName: '', listText: '', tactics: [] }); t.view.players = true; }
+  else if (k === 'pdel') { if (t.rounds.some(x => x.pairings.some(q => q.a === p.id || q.b === p.id))) { toast(L('Spieler ist schon gepaart – stattdessen „Aussteigen“ nutzen.', 'Player is already paired – use “drop” instead.')); return; } t.players = t.players.filter(x => x !== p); }
+  else if (k === 'pdrop') p.dropped = !p.dropped;
+  else if (k === 'startRound' || k === 'nextRound') {
+    const n = t.rounds.length, sw = tSwiss(t, n);
+    t.rounds.push({ plan: '', pairings: sw.pairings }); t.view.round = n;
+    if (sw.rematch) toast(L('Ohne Wiederholungen nicht möglich – einige Paarungen wiederholen sich.', 'Not possible without rematches – some pairings repeat.'));
+  }
+  else if (k === 'swiss') { const sw = tSwiss(t, r); rd.pairings = sw.pairings; if (sw.rematch) toast(L('Ohne Wiederholungen nicht möglich – einige Paarungen wiederholen sich.', 'Not possible without rematches – some pairings repeat.')); }
+  else if (k === 'pradd') rd.pairings.push({ id: uid(), a: '', b: '', res: null });
+  else if (k === 'prdel') rd.pairings = rd.pairings.filter(x => x !== pr);
+  else if (k === 'prclear') { if (!(await askConfirm(L('Ergebnis dieser Paarung löschen? Das zugehörige Spiel wird aus „Gespielte Spiele“ entfernt.', 'Clear this result? The related game is removed from “Played games”.'), L('Löschen', 'Clear')))) return; if (pr.res && pr.res.gameId) { games = games.filter(g => g.id !== pr.res.gameId); gmSaveHist(); } pr.res = null; }
+  else if (k === 'quick') { tQuickResult(t, r, pr); return; }
+  else if (k === 'play') { tPlayTracker(t, r, pr); return; }
+  else if (k === 'round') t.view.round = +b.dataset.r;
+  else if (k === 'rollPlan') { const ps = rulesetById(t.rs).battleplans || []; if (ps.length) rd.plan = ps[Math.floor(Math.random() * ps.length)].name; }
+  else if (k === 'finish') { const open = t.rounds.reduce((n, x) => n + x.pairings.filter(q => !q.res).length, 0); if (!(await askConfirm(open ? L(`Es sind noch ${open} Ergebnisse offen. Turnier trotzdem abschließen?`, `${open} results are still open. Finish anyway?`) : L('Turnier abschließen? Es kann danach wieder geöffnet werden.', 'Finish the tournament? It can be re-opened later.'), L('Abschließen', 'Finish')))) return; t.status = 'done'; t.finished = Date.now(); }
+  else if (k === 'reopen') t.status = 'open';
+  else if (k === 'text') { const x = tResultText(t); try { await navigator.clipboard.writeText(x); toast(L('Ergebnisse kopiert', 'Results copied')); } catch { openModal(L('Ergebnisse', 'Results'), `<textarea rows="14" readonly>${esc(x)}</textarea>`, [{ label: 'OK', primary: true }]); } return; }
+  else if (k === 'del') { if (!(await askConfirm(L(`„${t.name}“ löschen? Die Spiele bleiben in „Gespielte Spiele“ erhalten.`, `Delete “${t.name}”? The games stay in “Played games”.`), L('Löschen', 'Delete')))) return; tours = tours.filter(x => x !== t); ws.tour.cur = ''; saveWs(); tourSave(); renderTour(); return; }
+  else return;
+  tTouch(t); renderTour();
+});
+tEl('tourView').addEventListener('change', e => {
+  const el = e.target, k = el.dataset.trIn, t = tCur(); if (!k || !t) return;
+  const r = Math.min(t.view.round || 0, Math.max(0, t.rounds.length - 1)), rd = t.rounds[r];
+  const pEl = el.closest('[data-pid]'), p = pEl ? tP(t, pEl.dataset.pid) : null, prEl = el.closest('[data-prid]'), pr = prEl && rd ? rd.pairings.find(x => x.id === prEl.dataset.prid) : null;
+  if (k === 'name') t.name = el.value.trim() || t.name;
+  else if (k === 'nRounds') t.nRounds = +el.value;
+  else if (k === 'scoring') t.scoring = el.value;
+  else if (k === 'rs') t.rs = el.value;
+  else if (k === 'pname') p.name = el.value.trim() || p.name;
+  else if (k === 'plist') tPlayerFromList(p, lists.find(l => l.id === el.value));
+  else if (k === 'pfac') p.faction = el.value;
+  else if (k === 'plan') rd.plan = el.value;
+  else if (k === 'pa') pr.a = el.value;
+  else if (k === 'pb') { if (el.value === 'bye') { pr.b = null; pr.res = { bye: true, vp: [0, 0] }; } else { pr.b = el.value; if (pr.res && pr.res.bye) pr.res = null; } }
+  else return;
+  tTouch(t); renderTour();
+});
+
 // ================= Cloud-Sync (optional, nur auf der eigenen Adresse) =================
 // Lokal zuerst: alles bleibt im Browser gespeichert; nach Google-Anmeldung werden Listen, Spiele, laufendes Spiel und
 // Einheiten-Bibliothek mit Firestore abgeglichen (users/{uid}/lists|games|state). Jeder Eintrag als JSON-Text mit Zeitstempel,
@@ -3773,7 +4159,8 @@ const SYNC_HOST = /(^|\.)github\.io$|^localhost$|^127\.0\.0\.1$/;
 const syncAvailable = () => !!window.__syncMock || (/^https?:$/.test(location.protocol) && SYNC_HOST.test(location.hostname));
 const SY_COLL = {
   lists: { get: () => lists, set: v => { lists = v; }, key: 'aos2-lists' },
-  games: { get: () => games, set: v => { games = v; }, key: 'aos2-games' }
+  games: { get: () => games, set: v => { games = v; }, key: 'aos2-games' },
+  tours: { get: () => tours, set: v => { tours = v; }, key: 'aos2-tours' }
 };
 const SY_BLOB = {
   game: { get: () => game, set: v => { game = v; }, key: 'aos2-game' },
@@ -3799,7 +4186,7 @@ function syRaw(key, v) { SY.applying = true; try { store.set(key, v); } finally 
 function syncSoon(ms = 1500) { if (!SY.user) return; clearTimeout(SY.timer); SY.timer = setTimeout(syncPush, ms); }
 
 async function syncPush() {
-  if (!SY.be || !SY.user || SY.ready.size < 3 || SY.pushing) { if (SY.pushing) syncSoon(); return; }  // erst nach dem ersten Abruf aller Sammlungen hochladen
+  if (!SY.be || !SY.user || SY.ready.size < Object.keys(SY_COLL).length + 1 || SY.pushing) { if (SY.pushing) syncSoon(); return; }  // erst nach dem ersten Abruf aller Sammlungen hochladen
   const ops = [], commit = [], uid = SY.user.uid, m = SY.meta;
   for (const [c, d] of Object.entries(SY_COLL)) {
     const mc = m.coll[c] = m.coll[c] || {}, arr = d.get(), seen = new Set(); let bumped = false;
@@ -3888,7 +4275,7 @@ function syncStart(user) {
   m.coll = m.coll || {}; m.blob = m.blob || {}; m.dirtyAt = m.dirtyAt || {};
   SY.meta = m; syMetaSave();
   SY.state = 'busy'; syncUi();
-  for (const c of ['lists', 'games', 'state']) SY.unsub.push(SY.be.listen(user.uid, c, docs => syncApply(c, docs), e => { SY.state = 'err'; SY.err = (e && (e.code || e.message)) || String(e); syncUi(); }));
+  for (const c of [...Object.keys(SY_COLL), 'state']) SY.unsub.push(SY.be.listen(user.uid, c, docs => syncApply(c, docs), e => { SY.state = 'err'; SY.err = (e && (e.code || e.message)) || String(e); syncUi(); }));
 }
 
 async function syncLoadFirebase() {
