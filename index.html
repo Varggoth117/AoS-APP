@@ -433,6 +433,49 @@ header { position: relative; }
 .ts-pl { display: flex; gap: 6px; } .ts-pl select { flex: 1; min-width: 0; }
 .ts-act { justify-content: flex-start; margin-top: 8px; }
 @media (max-width: 700px) { .ts-me, .ts-grid { grid-template-columns: 1fr; } .ts-sum b { font-size: 17px; } }
+/* ---------- Historie ---------- */
+.hs-filter { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-bottom: 12px; }
+.hs-filter input[type=search] { grid-column: 1 / -1; }
+.hs-gh { display: flex; gap: 8px; align-items: baseline; margin: 14px 0 6px; }
+.hs-list { display: flex; flex-direction: column; gap: 6px; }
+.hs-game { border: 1px solid var(--line); border-left: 4px solid var(--line); border-radius: 10px; }
+.hs-game.w { border-left-color: var(--accent); } .hs-game.l { border-left-color: var(--ga-chaos); } .hs-game.d { border-left-color: var(--muted); }
+.hs-game > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: auto auto 1fr; gap: 4px 10px; align-items: center; padding: 8px 10px; }
+.hs-game > summary::-webkit-details-marker { display: none; }
+.hs-date { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.hs-out { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; background: var(--grid); }
+.hs-out.w { background: var(--accent); color: var(--accent-ink); } .hs-out.l { background: var(--ga-chaos); color: #fff; }
+.hs-match { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; min-width: 0; }
+.hs-match > span:first-child { text-align: right; } .hs-match > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hs-sc { font-weight: 700; font-variant-numeric: tabular-nums; font-size: 16px; }
+.hs-tags { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 4px; }
+.hs-tags:empty { display: none; }
+.hs-game .tag, .hs-plh .tag { font-size: 11px; padding: 1px 7px; border-radius: 10px; background: var(--grid); border: 1px solid var(--line); }
+.hs-plh .tag.att { background: var(--ga-chaos); color: #fff; border-color: transparent; } .hs-plh .tag.def { background: var(--ga-order); color: #fff; border-color: transparent; }
+.hs-detail { padding: 4px 12px 12px; border-top: 1px dashed var(--line); }
+.hs-meta { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: 14px; margin: 8px 0; }
+.hs-meta dt { color: var(--muted); } .hs-meta dd { margin: 0; }
+.hs-pls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 8px 0; }
+.hs-pl { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.hs-pl.me { border-color: var(--accent); }
+.hs-plh { display: flex; gap: 6px; align-items: center; } .hs-vp { margin-left: auto; font-size: 18px; font-weight: 700; }
+.hs-tacs { display: flex; flex-direction: column; gap: 2px; } .hs-tac b { color: var(--accent); letter-spacing: 1px; }
+.hs-rt th, .hs-rt td { padding: 4px 6px; } .hs-rt sup { color: var(--muted); font-size: 10px; margin-left: 1px; }
+.hs-sum { grid-template-columns: 1fr 1fr; }
+.hs-ft { margin-top: 10px; font-size: 13px; } .hs-ft td:first-child, .hs-ft th:first-child { text-align: left; }
+.hs-lst pre { white-space: pre-wrap; font-size: 13px; background: var(--grid); padding: 8px; border-radius: 8px; max-height: 40vh; overflow: auto; }
+.hs-edit { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.hs-ef { border: 1px solid var(--line); border-radius: 8px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.tr-qtac { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; } .tr-qtac > div { display: flex; flex-direction: column; gap: 4px; }
+@media (max-width: 700px) {
+  .hs-filter { grid-template-columns: 1fr 1fr; }
+  .hs-pls, .hs-edit, .tr-qtac { grid-template-columns: 1fr; }
+  .hs-game > summary { grid-template-columns: auto 1fr; }
+  .hs-game > summary .hs-out { grid-row: 1; grid-column: 1; } .hs-date { grid-column: 2; }
+  .hs-match { grid-column: 1 / -1; }
+}
+.v-sm { display: none; }
+@media (max-width: 700px) { .v-lg { display: none; } .v-sm { display: inline; } #viewSeg button { padding: 5px 7px; } }
 </style>
 </head>
 <body>
@@ -440,7 +483,7 @@ header { position: relative; }
 <template id="app-shell">
 <header>
   <div class="head-left">
-    <div class="seg" id="viewSeg" title="Bereich wählen"><button data-view="calc">Rechner</button><button data-view="builder">List Builder</button><button data-view="plans">Battleplans</button><button data-view="game">Spiel</button><button data-view="tour">Turnier</button></div>
+    <div class="seg" id="viewSeg" title="Bereich wählen"><button data-view="calc">Rechner</button><button data-view="builder"><span class="v-lg">List Builder</span><span class="v-sm">Listen</span></button><button data-view="plans"><span class="v-lg">Battleplans</span><span class="v-sm">Pläne</span></button><button data-view="game">Spiel</button><button data-view="tour">Turnier</button><button data-view="hist">Historie</button></div>
     <div>
       <h1 id="appTitle">Age of Sigmar 4 · Einheitenrechner</h1>
       <p id="appSub">Exakte Schadensverteilungen, effektive Lebenspunkte und direkte Vergleiche.</p>
@@ -650,7 +693,12 @@ header { position: relative; }
     <section class="panel" id="gmMain"></section>
     <aside class="panel" id="gmSide"></aside>
   </div>
-  <section class="panel" id="gmHist"></section>
+</main>
+<main id="histView" hidden>
+  <div class="layout hs-layout">
+    <section class="panel" id="hsMain"></section>
+    <aside class="panel" id="hsSide"></aside>
+  </div>
 </main>
 <main id="tourView" hidden>
   <div class="layout tr-layout">
@@ -2646,7 +2694,7 @@ const L = (de, en) => LANG === 'en' ? en : de;
 let lists = (store.get('aos2-lists', []) || []).filter(l => l && l.id);
 const saveLists = () => store.set('aos2-lists', lists); // gibt false zurück, wenn der Browser nicht speichern kann
 ws.bl = ws.bl || {};
-ws.view = ['builder', 'plans', 'game', 'tour'].includes(ws.view) ? ws.view : 'calc';
+ws.view = ['builder', 'plans', 'game', 'tour', 'hist'].includes(ws.view) ? ws.view : 'calc';
 
 const kwSet = u => new Set((u && u.keywords || []).map(normKw));
 const isHero = u => kwSet(u).has('hero');
@@ -2966,16 +3014,18 @@ function renderView() {
     builder: ['Age of Sigmar 4 · List Builder', L('Armeelisten nach General’s Handbook bauen, prüfen und direkt im Rechner auswerten.', 'Build and check army lists by the General’s Handbook and analyse them in the calculator.')],
     plans: ['Age of Sigmar 4 · Battleplans', L('Missionen, Saisonregeln und Battle-Tactic-Karten des aktuellen General’s Handbook.', 'Missions, season rules and battle tactic cards of the current General’s Handbook.')],
     game: [L('Age of Sigmar 4 · Spielbegleiter', 'Age of Sigmar 4 · Game Tracker'), L('Siegpunkte, Battle Tactics und Befehlspunkte Runde für Runde mitzählen.', 'Track victory points, battle tactics and command points round by round.')],
-    tour: [L('Age of Sigmar 4 · Turniere', 'Age of Sigmar 4 · Tournaments'), L('Spieler, Listen, Paarungen und Ergebnisse – Schweizer System oder manuell.', 'Players, lists, pairings and results – Swiss system or manual.')] }[v] || [];
+    tour: [L('Age of Sigmar 4 · Turniere', 'Age of Sigmar 4 · Tournaments'), L('Spieler, Listen, Paarungen und Ergebnisse – Schweizer System oder manuell.', 'Players, lists, pairings and results – Swiss system or manual.')],
+    hist: [L('Age of Sigmar 4 · Historie', 'Age of Sigmar 4 · History'), L('Alle gespielten Spiele mit Listen, Battle Tactics und Statistiken.', 'All played games with lists, battle tactics and statistics.')] }[v] || [];
   document.querySelectorAll('#viewSeg button').forEach(x => x.classList.toggle('on', x.dataset.view === v));
-  blEl('calcView').hidden = v !== 'calc'; blEl('builderView').hidden = v !== 'builder'; blEl('plansView').hidden = v !== 'plans'; blEl('gameView').hidden = v !== 'game'; blEl('tourView').hidden = v !== 'tour'; blEl('calcTools').hidden = v !== 'calc';
+  blEl('calcView').hidden = v !== 'calc'; blEl('builderView').hidden = v !== 'builder'; blEl('plansView').hidden = v !== 'plans'; blEl('gameView').hidden = v !== 'game'; blEl('tourView').hidden = v !== 'tour'; blEl('histView').hidden = v !== 'hist'; blEl('calcTools').hidden = v !== 'calc';
   blEl('appTitle').textContent = T[0]; blEl('appSub').textContent = T[1];
   if (v === 'builder') renderBuilder();
   if (v === 'plans') renderPlans();
   if (v === 'game') renderGame();
   if (v === 'tour') renderTour();
+  if (v === 'hist') renderHist();
 }
-blEl('viewSeg').onclick = e => { const v = e.target.dataset.view; if (v && v !== ws.view) { ws.view = v; saveWs(); renderView(); if (v === 'calc') { renderTarget(); compute(); } } };
+blEl('viewSeg').onclick = e => { const bt = e.target.closest('button[data-view]'), v = bt && bt.dataset.view; if (v && v !== ws.view) { ws.view = v; saveWs(); renderView(); if (v === 'calc') { renderTarget(); compute(); } } };
 
 function renderBuilder() {
   if (ws.view !== 'builder') return;
@@ -3430,7 +3480,7 @@ document.getElementById('mxDef').onchange = e => { ws.mxDef = e.target.value; co
 
 // Englische Texte für die neuen festen Beschriftungen
 Object.assign(EN, {
-  'Rechner': 'Calculator', 'Spiel': 'Game', 'Turnier': 'Tournament', 'Bereich wählen': 'Choose section', 'Verteidiger': 'Defenders',
+  'Rechner': 'Calculator', 'Spiel': 'Game', 'Turnier': 'Tournament', 'Historie': 'History', 'Pläne': 'Plans', 'Listen': 'Lists', 'Bereich wählen': 'Choose section', 'Verteidiger': 'Defenders',
   'Daten aktualisieren': 'Update data', 'Quelle': 'Source', 'automatisch erkennen': 'detect automatically',
   '⬇ Offline-Version': '⬇ Offline version', 'Aktuellen Stand als Datei herunterladen und ohne Internet nutzen': 'Download the current state as a file and use it without internet',
   'Übernehmen': 'Apply', 'Abbrechen': 'Cancel', 'Bitte bestätigen': 'Please confirm'
@@ -3773,6 +3823,7 @@ function gmSetupHtml() {
     <div class="gm-setrow"><span>${L('Angreifer', 'Attacker')}:</span><div class="seg">${[0, 1].map(i => `<button data-gm="att" data-p="${i}" class="${game.att === i ? 'on' : ''}">${esc(gmName(i))}</button>`).join('')}</div></div>
     <div class="gm-setgrid">${pCol(0)}${pCol(1)}</div>
     <p class="hint">${L('Listen und Taktiken kommen aus dem List Builder; Änderungen hier wirken nur auf dieses Spiel.', 'Lists and tactics come from the List Builder; changes here only affect this game.')}</p>
+    <label>${L('Notizen zum Spiel', 'Game notes')}<textarea data-gm-in="notes" rows="2" placeholder="${L('z. B. Schlüsselmomente, Fehler, Erkenntnisse …', 'e.g. key moments, mistakes, lessons …')}">${esc(game.notes || '')}</textarea></label>
   </div></details>`;
 }
 
@@ -3809,13 +3860,21 @@ function gmTableHtml() {
 
 // Gespeichertes Spiel mit allen Daten für spätere Statistiken (Spieler, Listen, Tactics, Runden im Detail)
 function gmRecord() {
-  const pl = gmPlan();
-  return { id: game.id, date: game.started, rs: game.rs, plan: (pl || {}).name || '', att: game.att, updated: Date.now(),
-    p: game.p.map((p, j) => { const l = lists.find(x => x.id === p.listId) || p.listSnap || null;
-      return { name: gmName(j), faction: p.faction, list: (l && l.name) || p.listName || '', listText: l && l.regiments ? listToText(l) : (p.listText || ''), tactics: p.tactics.filter(Boolean), vp: gmTotal(j),
-        tacDone: game.rounds.flatMap((rd, r) => rd.p[j].tac.map(c => ({ card: c, round: r + 1 }))) }; }),
-    rounds: game.rounds.map((rd, r) => [0, 1].map(j => gmRoundVP(r, j))),
-    detail: game.rounds.map(rd => ({ first: rd.first, p: rd.p.map(x => ({ obj: +x.obj || 0, tac: x.tac.slice(), other: +x.other || 0, cp: +x.cp || 0 })) })),
+  const pl = gmPlan(), rs = gmRuleset(), t = game.tour && typeof tours !== 'undefined' ? tours.find(x => x.id === game.tour.id) : null;
+  // Nur gespielte Runden speichern: bis zur aktuell gewählten oder letzten Runde mit Punkten/Eintrag
+  let nR = game.round + 1; game.rounds.forEach((rd, r) => { if (rd.first != null || rd.p.some(x => +x.obj || x.tac.length || +x.other)) nR = Math.max(nR, r + 1); });
+  const RR = game.rounds.slice(0, nR);
+  return { id: game.id, date: game.started, ended: Date.now(), updated: Date.now(), rs: game.rs, rsName: rs.name || '', season: rs.season || '', dataVer: typeof dataVerName === 'function' ? dataVerName() : '',
+    kind: game.tour ? (t && t.mode === 'self' ? 'tour-self' : 'tour-orga') : 'casual', me: game.tour && !(t && t.mode === 'self') ? null : 0,
+    plan: (pl || {}).name || '', planTable: pl ? pl.table || 1 : null, att: game.att,
+    p: game.p.map((p, j) => { const l = lists.find(x => x.id === p.listId) || (p.listSnap && p.listSnap.regiments ? p.listSnap : null);
+      return { name: gmName(j), role: game.att === j ? 'att' : 'def', faction: p.faction || (l && l.faction) || '', list: (l && l.name) || p.listName || '', listId: p.listId || '',
+        listText: l ? listToText(l) : (p.listText || ''), listSnap: l ? clone(l) : null, points: l ? listPoints(l) : null,
+        formation: l ? l.formation || '' : '', aor: l ? l.aor || '' : '', tactics: p.tactics.filter(Boolean), vp: gmTotal(j), fury: +p.fury || 0,
+        tacDone: game.rounds.flatMap((rd, r) => rd.p[j].tac.map(c => ({ card: c, round: r + 1, tier: gmDone(j, c, r) + 1 }))) }; }),
+    rounds: RR.map((rd, r) => [0, 1].map(j => gmRoundVP(r, j))),
+    detail: RR.map((rd, r) => ({ first: rd.first, underdog: gmUnderdog(r), p: rd.p.map(x => ({ obj: +x.obj || 0, tac: x.tac.slice(), other: +x.other || 0, cp: +x.cp || 0 })) })),
+    notes: game.notes || '',
     ...(game.tour ? { tour: { id: game.tour.id, name: game.tour.name, round: game.tour.round } } : {}) };
 }
 function gmResultText() {
@@ -3858,12 +3917,6 @@ function renderGame() {
       : `<p class="hint">${L('Unter „Spiel einrichten“ einen Battleplan wählen.', 'Choose a battleplan under “Game setup”.')}</p>`}
     ${myTacs.length ? `<details class="abil" data-gm-open="tacs"${game.open.tacs ? ' open' : ''}><summary>${L('Battle Tactics – was ist zu tun?', 'Battle tactics – what to do?')}</summary><div class="abil-body">${myTacs.map(bpTacticCard).join('')}</div></details>` : ''}
     ${rs.seasonRules ? `<details class="abil" data-gm-open="season"${game.open.season ? ' open' : ''}><summary>${L('Saisonregeln', 'Season rules')}: ${esc(rs.seasonRules.name || '')}</summary><div class="abil-body">${(rs.seasonRules.rules || []).map(x => `<div class="rt-ab"><b>${esc(x.name)}</b><p class="rt-short">${bpTxt(x)}</p></div>`).join('')}</div></details>` : ''}`;
-  gmEl('gmHist').innerHTML = `<div class="panel-head"><h2>${L('Gespielte Spiele', 'Played games')}</h2><span class="hint">${games.length}</span></div>
-    ${games.length ? `<div class="gm-hist">${games.slice().sort((x, y) => y.date - x.date).map(g => { const w = g.p[0].vp === g.p[1].vp ? -1 : g.p[0].vp > g.p[1].vp ? 0 : 1;
-      return `<div class="gm-hrow"><span class="hint">${new Date(g.date).toLocaleDateString(LANG === 'en' ? 'en-GB' : 'de-DE')}</span>
-        <span>${g.p.map((p, i) => `<span class="${w === i ? 'win' : ''}">${esc(p.name)}${p.faction ? ` <span class="hint">(${esc(p.faction)})</span>` : ''} ${p.vp}</span>`).join(' : ')}</span>
-        <span class="hint">${g.tour ? '🏆 ' + esc(g.tour.name) + ' R' + (g.tour.round + 1) + ' · ' : ''}${esc(g.plan || '')}</span><button class="icon" data-gm="histDel" data-id="${g.id}" title="${L('Löschen', 'Delete')}">✕</button></div>`; }).join('')}</div>
-      ${gmStats()}` : `<p class="hint">${L('Noch keine Spiele gespeichert. „Spiel beenden & speichern“ legt das Ergebnis hier ab.', 'No games saved yet. “Finish & save game” stores the result here.')}</p>`}`;
   document.querySelectorAll('#gameView [data-gm-open]').forEach(d => d.ontoggle = () => { game.open[d.dataset.gmOpen] = d.open; gmSave(); });
 }
 // Bilanz je eigener Fraktion
@@ -3906,6 +3959,7 @@ gmEl('gameView').addEventListener('change', e => {
   else if (k === 'tac') { p.tactics[+t.dataset.k] = t.value; p.tactics = p.tactics.map(v => v || ''); }
   else if (k === 'plan') game.plan = t.value;
   else if (k === 'rs') { game.rs = t.value; game.plan = ''; }
+  else if (k === 'notes') game.notes = t.value;
   else if (k === 'fury') p.fury = Math.max(0, +t.value || 0);
   else game.rounds[game.round].p[i][k] = Math.max(0, +t.value || 0);
   gmSave(); renderGame();
@@ -3927,8 +3981,8 @@ function tNew(name) {
   return { id: uid(), name, created: Date.now(), updated: Date.now(), status: 'open', rs: rulesetById(null).id, nRounds: 3, scoring: 'wins', players: [], rounds: [], view: { round: 0 } };
 }
 function tPlayerFromList(p, l) {
-  if (!l) { p.listId = ''; p.listName = ''; p.listText = ''; p.tactics = []; return p; }
-  p.listId = l.id; p.listName = l.name; p.faction = l.faction || p.faction; p.tactics = (l.tactics || []).filter(Boolean); p.listText = listToText(l);
+  if (!l) { p.listId = ''; p.listName = ''; p.listText = ''; p.listSnap = null; p.tactics = []; return p; }
+  p.listId = l.id; p.listName = l.name; p.faction = l.faction || p.faction; p.tactics = (l.tactics || []).filter(Boolean); p.listText = listToText(l); p.listSnap = clone(l);
   return p;
 }
 // ---------- Tabelle ----------
@@ -3975,10 +4029,13 @@ function tSwiss(t, r) {
   return { pairings: out, rematch };
 }
 // ---------- Ergebnis eines Spiels übernehmen ----------
-function tGameRecord(t, r, pr, vp) {
-  const pl = [tP(t, pr.a), tP(t, pr.b)];
-  return { id: uid(), date: Date.now(), updated: Date.now(), rs: t.rs, plan: t.rounds[r].plan || '', quick: true,
-    p: pl.map((p, j) => ({ name: p && p.name ? p.name : (j ? L('Gegner', 'Opponent') : '?'), faction: p ? p.faction : '', list: p ? p.listName : '', listText: p ? p.listText : '', tactics: p ? p.tactics : [], vp: +vp[j] || 0 })),
+function tGameRecord(t, r, pr, vp, tac) {
+  const pl = [tP(t, pr.a), tP(t, pr.b)], rs = rulesetById(t.rs);
+  return { id: uid(), date: Date.now(), updated: Date.now(), rs: t.rs, rsName: rs.name || '', season: rs.season || '', dataVer: typeof dataVerName === 'function' ? dataVerName() : '',
+    plan: t.rounds[r].plan || '', quick: true, kind: t.mode === 'self' ? 'tour-self' : 'tour-orga', me: t.mode === 'self' ? 0 : null,
+    p: pl.map((p, j) => { const l = p && p.listId ? lists.find(x => x.id === p.listId) : null;
+      return { name: p && p.name ? p.name : (j ? L('Gegner', 'Opponent') : '?'), faction: p ? p.faction : '', list: p ? p.listName : '', listText: p ? p.listText : '', listSnap: p && p.listSnap ? p.listSnap : (l ? clone(l) : null),
+        points: l ? listPoints(l) : null, tactics: (tac && tac[j]) || (p ? p.tactics : []) || [], vp: +vp[j] || 0, tacDone: [] }; }),
     tour: { id: t.id, name: t.name, round: r } };
 }
 function tourResultFromGame(ref, rec) {
@@ -3990,16 +4047,22 @@ function tourResultFromGame(ref, rec) {
   toast(L(`Ergebnis für „${t.name}“, Runde ${ref.round + 1} übernommen`, `Result stored in “${t.name}”, round ${ref.round + 1}`));
 }
 function tQuickResult(t, r, pr) {
-  const a = tP(t, pr.a), b = tP(t, pr.b), v = (pr.res && pr.res.vp) || ['', ''];
+  const a = tP(t, pr.a), b = tP(t, pr.b), v = (pr.res && pr.res.vp) || ['', ''], g0 = pr.res && pr.res.gameId && games.find(g => g.id === pr.res.gameId);
+  const tacs = (rulesetById(t.rs).battleTactics || []).map(x => x.name), maxT = rulesetById(t.rs).maxTactics ?? 2;
+  const cur = j => (g0 ? g0.p[j].tactics : ([a, b][j] || {}).tactics) || [];
+  const tacSel = j => Array.from({ length: maxT }, (_, k) => `<select data-tq="${j}"><option value="">–</option>${tacs.map(n => `<option${cur(j)[k] === n ? ' selected' : ''}>${esc(n)}</option>`).join('')}</select>`).join('');
   openModal(L('Ergebnis eintragen', 'Enter result'), `<p>${L('Runde', 'Round')} ${r + 1}${t.rounds[r].plan ? ' · ' + esc(t.rounds[r].plan) : ''}</p>
     <div class="tr-quick"><label>${esc(a && a.name ? a.name : '?')}<input type="number" inputmode="numeric" id="tqA" value="${esc(v[0])}" min="0"></label><span>:</span><label>${esc(b && b.name ? b.name : L('Gegner', 'Opponent'))}<input type="number" inputmode="numeric" id="tqB" value="${esc(v[1])}" min="0"></label></div>
-    <p class="hint">${L('Siegpunkte am Spielende. Für Runden, Tactics und Befehlspunkte das Spiel stattdessen mit dem Spielbegleiter erfassen.', 'Victory points at the end of the game. To record rounds, tactics and command points, use the game tracker instead.')}</p>`,
+    <div class="tr-qtac"><div><span class="hint">Battle Tactics ${esc(a && a.name ? a.name : '')}</span>${tacSel(0)}</div><div><span class="hint">Battle Tactics ${esc(b && b.name ? b.name : L('Gegner', 'Opponent'))}</span>${tacSel(1)}</div></div>
+    <p class="hint">${L('Siegpunkte am Spielende. Für Runden, erfüllte Tactics und Befehlspunkte das Spiel stattdessen mit dem Spielbegleiter erfassen.', 'Victory points at the end of the game. To record rounds, completed tactics and command points, use the game tracker instead.')}</p>`,
     [{ label: L('Abbrechen', 'Cancel'), cancel: true }, { label: L('Speichern', 'Save'), primary: true, onClick: () => {
       const x = document.getElementById('tqA').value, y = document.getElementById('tqB').value;
       if (x === '' || y === '') { toast(L('Bitte beide Ergebnisse eintragen.', 'Please enter both scores.')); return false; }
-      const old = pr.res && pr.res.gameId && games.find(g => g.id === pr.res.gameId);
-      if (old) { old.p[0].vp = +x; old.p[1].vp = +y; old.updated = Date.now(); }
-      else { const rec = tGameRecord(t, r, pr, [x, y]); games.push(rec); pr.res = { gameId: rec.id }; }
+      const tac = [0, 1].map(j => [...document.querySelectorAll(`[data-tq="${j}"]`)].map(s => s.value).filter(Boolean));
+      [a, b].forEach((p, j) => { if (p && tac[j].length) p.tactics = tac[j]; });
+      const old = g0;
+      if (old) { old.p[0].vp = +x; old.p[1].vp = +y; old.p[0].tactics = tac[0]; old.p[1].tactics = tac[1]; old.plan = t.rounds[r].plan || old.plan; old.updated = Date.now(); }
+      else { const rec = tGameRecord(t, r, pr, [x, y], tac); games.push(rec); pr.res = { gameId: rec.id }; }
       gmSaveHist();
       pr.res = { ...pr.res, vp: [+x, +y], mode: (pr.res && pr.res.mode) || 'quick' }; tTouch(t); renderTour();
     } }]);
@@ -4012,7 +4075,7 @@ async function tPlayTracker(t, r, pr) {
   const g = gmNew(), rs = rulesetById(t.rs), maxT = rs.maxTactics ?? 2;
   g.rs = t.rs; g.plan = t.rounds[r].plan || ''; g.open = { setup: false };
   g.p = [pr.a, pr.b].map(id => { const p = tP(t, id) || {}; const l = lists.find(x => x.id === p.listId);
-    return { name: p.name || (id === pr.b ? L('Gegner', 'Opponent') : '?'), listId: l ? l.id : '', listName: p.listName || '', listText: p.listText || '', faction: p.faction || '', tactics: (p.tactics || []).slice(0, maxT), fury: 0 }; });
+    return { name: p.name || (id === pr.b ? L('Gegner', 'Opponent') : '?'), listId: l ? l.id : '', listName: p.listName || '', listText: p.listText || '', listSnap: p.listSnap || null, faction: p.faction || '', tactics: (p.tactics || []).slice(0, maxT), fury: 0 }; });
   g.tour = { id: t.id, name: t.name, round: r, pairing: pr.id };
   game = g; gmSave(); ws.view = 'game'; saveWs(); renderView();
 }
@@ -4272,6 +4335,258 @@ function tSelfChange(t, k, r, rd, el) {
   else return false;
   return true;
 }
+
+// ================= Historie: alle gespielten Spiele (eigener Bereich) =================
+// Liest die Spiele aus `games` (gesynct). „Ich“-Sicht: g.me (0/1) – bei Orga-Turnierspielen null (neutral).
+ws.hs = { q: '', res: '', kind: '', fac: '', ofac: '', group: 'month', sort: 'new', ...(ws.hs || {}) };
+const hsEl = id => document.getElementById(id);
+const hsMe = g => g.me === null ? null : (g.me === 1 ? 1 : 0);
+const hsOut = g => { const m = hsMe(g); if (m === null) return ''; const a = +g.p[m].vp || 0, b = +g.p[1 - m].vp || 0; return a > b ? 'w' : a < b ? 'l' : 'd'; };
+const hsKind = g => g.kind || (g.tour ? 'tour' : 'casual');
+const hsDate = (d, time) => new Date(d).toLocaleString(LANG === 'en' ? 'en-GB' : 'de-DE', time ? { dateStyle: 'medium', timeStyle: 'short' } : { day: '2-digit', month: '2-digit', year: 'numeric' });
+const HS_OUT = () => ({ w: L('Sieg', 'Win'), d: L('Unentschieden', 'Draw'), l: L('Niederlage', 'Loss') });
+function hsFiltered() {
+  const f = ws.hs, q = f.q.trim().toLowerCase();
+  let arr = games.filter(g => g && g.p && g.p.length === 2);
+  if (q) arr = arr.filter(g => [g.plan, g.tour && g.tour.name, g.notes, ...g.p.flatMap(p => [p.name, p.faction, p.list, ...(p.tactics || [])])].filter(Boolean).join(' ').toLowerCase().includes(q));
+  if (f.res) arr = arr.filter(g => hsOut(g) === f.res);
+  if (f.kind) arr = arr.filter(g => f.kind === 'tour' ? !!g.tour : !g.tour);
+  if (f.fac) arr = arr.filter(g => { const m = hsMe(g); return m === null ? g.p.some(p => p.faction === f.fac) : g.p[m].faction === f.fac; });
+  if (f.ofac) arr = arr.filter(g => { const m = hsMe(g); return m === null ? g.p.some(p => p.faction === f.ofac) : g.p[1 - m].faction === f.ofac; });
+  const diff = g => { const m = hsMe(g) ?? 0; return (+g.p[m].vp || 0) - (+g.p[1 - m].vp || 0); };
+  const sorts = { new: (a, b) => b.date - a.date, old: (a, b) => a.date - b.date, best: (a, b) => diff(b) - diff(a) || b.date - a.date, worst: (a, b) => diff(a) - diff(b) || b.date - a.date };
+  return arr.sort(sorts[f.sort] || sorts.new);
+}
+function hsGroupKey(g) {
+  const m = hsMe(g) ?? 0, d = new Date(g.date);
+  switch (ws.hs.group) {
+    case 'month': return [d.getFullYear() * 100 + d.getMonth(), d.toLocaleDateString(LANG === 'en' ? 'en-GB' : 'de-DE', { month: 'long', year: 'numeric' })];
+    case 'tour': return g.tour ? ['t' + g.tour.id, '🏆 ' + g.tour.name] : ['zz', L('Freundschaftsspiele', 'Casual games')];
+    case 'fac': return [g.p[m].faction || '~', (g.me === null ? '' : L('Ich mit ', 'Me with ')) + (g.p[m].faction || L('ohne Fraktion', 'no faction'))];
+    case 'ofac': return [g.p[1 - m].faction || '~', L('Gegen ', 'Vs ') + (g.p[1 - m].faction || L('unbekannte Fraktion', 'unknown faction'))];
+    case 'plan': return [g.plan || '~', g.plan || L('ohne Battleplan', 'no battleplan')];
+    default: return ['', ''];
+  }
+}
+function hsStats(arr) {
+  const mine = arr.filter(g => hsMe(g) !== null), s = { n: arr.length, w: 0, d: 0, l: 0, vp: 0, va: 0, k: mine.length };
+  for (const g of mine) { const o = hsOut(g), m = hsMe(g); s[o]++; s.vp += +g.p[m].vp || 0; s.va += +g.p[1 - m].vp || 0; }
+  return s;
+}
+const hsRec = s => `${s.w}/${s.d}/${s.l}`;
+function hsFacTable(arr, side) {
+  const by = new Map();
+  for (const g of arr) { const m = hsMe(g); if (m === null) continue; const f = g.p[side === 'me' ? m : 1 - m].faction || '–'; const x = by.get(f) || []; x.push(g); by.set(f, x); }
+  const rows = [...by].map(([f, gs]) => [f, hsStats(gs)]).sort((a, b) => b[1].k - a[1].k || a[0].localeCompare(b[0]));
+  return rows.length ? `<table class="gm-table hs-ft"><thead><tr><th>${side === 'me' ? L('Meine Fraktion', 'My faction') : L('Gegnerfraktion', 'Opponent faction')}</th><th>${L('Spiele', 'Games')}</th><th>${L('S/U/N', 'W/D/L')}</th><th>%</th><th>Ø ${L('SP', 'VP')}</th></tr></thead><tbody>
+    ${rows.map(([f, s]) => `<tr><td>${esc(f)}</td><td>${s.k}</td><td>${hsRec(s)}</td><td>${s.k ? Math.round((s.w + s.d / 2) / s.k * 100) : 0}</td><td>${s.k ? Math.round(s.vp / s.k) + ' : ' + Math.round(s.va / s.k) : '–'}</td></tr>`).join('')}</tbody></table>` : '';
+}
+function hsTacStats(arr) {
+  const by = new Map();
+  for (const g of arr) { const m = hsMe(g); if (m === null) continue; const p = g.p[m];
+    for (const c of p.tactics || []) { const x = by.get(c) || { n: 0, tiers: 0, w: 0 }; x.n++; x.tiers += (p.tacDone || []).filter(t => t.card === c).length; if (hsOut(g) === 'w') x.w++; by.set(c, x); } }
+  const rows = [...by].sort((a, b) => b[1].n - a[1].n);
+  return rows.length ? `<table class="gm-table hs-ft"><thead><tr><th>${L('Meine Battle Tactics', 'My battle tactics')}</th><th>${L('Spiele', 'Games')}</th><th title="${L('erfüllte Stufen pro Spiel (nur mit Spielbegleiter erfasst)', 'completed tiers per game (tracker games only)')}">Ø ${L('Stufen', 'tiers')}</th><th>${L('Siege', 'Wins')}</th></tr></thead><tbody>
+    ${rows.map(([c, x]) => `<tr><td>${esc(c)}</td><td>${x.n}</td><td>${(x.tiers / x.n).toFixed(1)}</td><td>${x.w}</td></tr>`).join('')}</tbody></table>` : '';
+}
+function hsPlayerBlock(g, j) {
+  const p = g.p[j], done = p.tacDone || [];
+  return `<div class="hs-pl${hsMe(g) === j ? ' me' : ''}">
+    <div class="hs-plh"><b>${esc(p.name || '?')}</b>${p.role ? `<span class="tag ${p.role}">${p.role === 'att' ? L('Angreifer', 'Attacker') : L('Verteidiger', 'Defender')}</span>` : (g.att === j ? `<span class="tag att">${L('Angreifer', 'Attacker')}</span>` : '')}<span class="hs-vp">${+p.vp || 0}</span></div>
+    <div class="hint">${esc(p.faction || L('Fraktion unbekannt', 'faction unknown'))}${p.formation ? ' · ' + esc(p.formation) : ''}${p.aor ? ' · ' + esc(p.aor) : ''}</div>
+    ${p.list ? `<div>${L('Liste', 'List')}: ${esc(p.list)}${p.points ? ` <span class="hint">(${p.points} ${L('Pkt.', 'pts')})</span>` : ''}</div>` : ''}
+    <div class="hs-tacs">${(p.tactics || []).length ? (p.tactics || []).map(c => { const d = done.filter(t => t.card === c); return `<span class="hs-tac">${esc(c)}${d.length ? ` <b>${'●'.repeat(d.length)}${'○'.repeat(Math.max(0, 3 - d.length))}</b> <span class="hint">R${d.map(t => t.round).join(', R')}</span>` : (g.detail ? ' <span class="hint">○○○</span>' : '')}</span>`; }).join('') : `<span class="hint">${L('keine Battle Tactics gespeichert', 'no battle tactics stored')}</span>`}</div>
+  </div>`;
+}
+function hsDetail(g) {
+  const tr = g.tour ? tours.find(t => t.id === g.tour.id) : null, openT = tours.filter(t => t.status !== 'done');
+  const meta = [[L('Datum', 'Date'), hsDate(g.date, true) + (g.ended && g.ended > g.date ? ` · ${Math.round((g.ended - g.date) / 60000)} min` : '')],
+    ['Battleplan', g.plan || '–'], [L('Regelwerk', 'Ruleset'), [g.rsName || (rulesetById(g.rs) || {}).name, g.season].filter(Boolean).join(' · ') || '–'],
+    [L('Datenstand', 'Data version'), g.dataVer || '–'], [L('Art', 'Type'), g.tour ? `🏆 ${esc(g.tour.name)} · ${L('Runde', 'Round')} ${g.tour.round + 1}${tr ? '' : ' ' + L('(Turnier gelöscht)', '(tournament deleted)')}` : L('Freundschaftsspiel', 'Casual game')],
+    [L('Erfasst', 'Recorded'), g.detail ? L('mit Spielbegleiter (Runden im Detail)', 'with game tracker (rounds in detail)') : L('nur Endergebnis', 'final score only')]];
+  const rounds = g.detail ? `<div class="tr-tablewrap"><table class="gm-table hs-rt"><thead><tr><th></th>${g.detail.map((_, r) => `<th>R${r + 1}</th>`).join('')}<th>${L('Gesamt', 'Total')}</th></tr></thead><tbody>
+    ${[0, 1].map(j => `<tr><th>${esc(g.p[j].name)}</th>${g.detail.map((d, r) => { const x = d.p[j]; return `<td title="${L('Ziele', 'Obj')} ${x.obj} · ${L('Taktik', 'Tactic')} ${x.tac.join(', ') || '–'} · ${L('Sonst.', 'Other')} ${x.other} · CP ${x.cp}">${(g.rounds && g.rounds[r] ? g.rounds[r][j] : x.obj + x.tac.length * 5 + x.other)}${d.first === j ? '<sup>1</sup>' : ''}${d.underdog === j ? '<sup>U</sup>' : ''}</td>`; }).join('')}<td><b>${+g.p[j].vp || 0}</b></td></tr>`).join('')}
+    </tbody></table></div><p class="hint">${L('¹ zuerst am Zug · U = Underdog zu Rundenbeginn. Zahlen antippen für Details.', '¹ went first · U = underdog at start of round. Tap numbers for details.')}</p>` : '';
+  return `<div class="hs-detail">
+    <dl class="hs-meta">${meta.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
+    <div class="hs-pls">${hsPlayerBlock(g, 0)}${hsPlayerBlock(g, 1)}</div>
+    ${rounds}
+    <label>${L('Notizen', 'Notes')}<textarea data-hs-in="notes" rows="2">${esc(g.notes || '')}</textarea></label>
+    <div class="row-btns">
+      ${g.p.some(p => p.listText || p.listSnap) ? `<button class="small" data-hs="lists">📜 ${L('Listen ansehen', 'View lists')}</button>` : ''}
+      ${openT.length ? `<button class="small" data-hs="toTour">🏆 ${g.tour ? L('In anderes Turnier', 'Move to tournament') : L('In Turnier übernehmen', 'Add to tournament')}</button>` : ''}
+      ${tr ? `<button class="small" data-hs="openTour">${L('Zum Turnier', 'Open tournament')}</button>` : ''}
+      <button class="small" data-hs="edit">✎ ${L('Bearbeiten', 'Edit')}</button>
+      <button class="small" data-hs="del">${L('Löschen', 'Delete')}</button>
+    </div>
+  </div>`;
+}
+function hsRow(g) {
+  const m = hsMe(g), o = hsOut(g), a = m ?? 0, b = 1 - a, open = ws.hs.open === g.id;
+  return `<details class="hs-game ${o}" data-gid="${g.id}"${open ? ' open' : ''}><summary>
+      <span class="hs-date">${hsDate(g.date)}</span>
+      ${o ? `<span class="hs-out ${o}">${HS_OUT()[o][0]}</span>` : '<span class="hs-out n">–</span>'}
+      <span class="hs-match"><span><b>${esc(g.p[a].name)}</b> <span class="hint">${esc(g.p[a].faction || '')}</span></span><span class="hs-sc">${+g.p[a].vp || 0} : ${+g.p[b].vp || 0}</span><span><b>${esc(g.p[b].name)}</b> <span class="hint">${esc(g.p[b].faction || '')}</span></span></span>
+      <span class="hs-tags">${g.tour ? `<span class="tag">🏆 ${esc(g.tour.name)} R${g.tour.round + 1}</span>` : ''}${g.plan ? `<span class="tag">${esc(g.plan)}</span>` : ''}${g.detail ? '<span class="tag" title="' + L('mit Spielbegleiter erfasst', 'recorded with tracker') + '">📋</span>' : ''}</span>
+    </summary>${open ? hsDetail(g) : ''}</details>`;
+}
+function renderHist() {
+  if (ws.view !== 'hist') return;
+  const f = ws.hs, arr = hsFiltered(), st = hsStats(arr), all = games.filter(g => g && g.p);
+  const facs = [...new Set(all.flatMap(g => g.p.map(p => p.faction)).filter(Boolean))].sort();
+  const sel = (k, opts) => `<select data-hs-in="${k}">${opts.map(([v, t]) => `<option value="${esc(v)}"${f[k] === v ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select>`;
+  const groups = []; let cur = null;
+  for (const g of arr) { const [k, lbl] = hsGroupKey(g); if (!cur || cur.k !== k) { cur = { k, lbl, gs: [] }; groups.push(cur); } cur.gs.push(g); }
+  if (['fac', 'ofac', 'plan'].includes(f.group)) groups.sort((a, b) => (a.k === '~') - (b.k === '~') || a.lbl.localeCompare(b.lbl));
+  hsEl('hsMain').innerHTML = `<div class="panel-head"><h2>${L('Gespielte Spiele', 'Played games')}</h2><span class="hint">${arr.length}${arr.length !== all.length ? ' / ' + all.length : ''}</span></div>
+    <div class="hs-filter">
+      <input type="search" data-hs-in="q" value="${esc(f.q)}" placeholder="${L('Suchen: Spieler, Fraktion, Liste, Battleplan, Turnier …', 'Search: player, faction, list, battleplan, tournament …')}">
+      ${sel('res', [['', L('Alle Ergebnisse', 'All results')], ['w', L('Siege', 'Wins')], ['d', L('Unentschieden', 'Draws')], ['l', L('Niederlagen', 'Losses')]])}
+      ${sel('kind', [['', L('Alle Spiele', 'All games')], ['casual', L('Freundschaftsspiele', 'Casual games')], ['tour', L('Turnierspiele', 'Tournament games')]])}
+      ${sel('fac', [['', L('Meine Fraktion: alle', 'My faction: all')], ...facs.map(x => [x, x])])}
+      ${sel('ofac', [['', L('Gegner: alle Fraktionen', 'Opponent: all factions')], ...facs.map(x => [x, x])])}
+      ${sel('group', [['month', L('Nach Monat', 'By month')], ['tour', L('Nach Turnier', 'By tournament')], ['fac', L('Nach meiner Fraktion', 'By my faction')], ['ofac', L('Nach Gegnerfraktion', 'By opponent faction')], ['plan', L('Nach Battleplan', 'By battleplan')], ['none', L('Ohne Gruppen', 'No groups')]])}
+      ${sel('sort', [['new', L('Neueste zuerst', 'Newest first')], ['old', L('Älteste zuerst', 'Oldest first')], ['best', L('Höchste Siege zuerst', 'Biggest wins first')], ['worst', L('Höchste Niederlagen zuerst', 'Biggest losses first')]])}
+      ${f.q || f.res || f.kind || f.fac || f.ofac ? `<button class="small" data-hs="reset">${L('Filter zurücksetzen', 'Reset filters')}</button>` : ''}
+    </div>
+    ${arr.length ? groups.map(gr => `${f.group !== 'none' ? `<h3 class="hs-gh">${esc(gr.lbl)} <span class="hint">${gr.gs.length} · ${hsRec(hsStats(gr.gs))}</span></h3>` : ''}<div class="hs-list">${gr.gs.map(hsRow).join('')}</div>`).join('')
+      : `<p class="hint">${all.length ? L('Keine Spiele passen zum Filter.', 'No games match the filter.') : L('Noch keine Spiele gespeichert. Spiele aus dem Reiter „Spiel“ und aus Turnieren landen hier.', 'No games saved yet. Games from the “Game” tab and from tournaments appear here.')}</p>`}`;
+  hsEl('hsSide').innerHTML = `<div class="panel-head"><h2>${L('Statistik', 'Statistics')}</h2></div>
+    <div class="ts-sum hs-sum">
+      <div><span class="hint">${L('Spiele', 'Games')}</span><b>${st.n}</b></div>
+      <div><span class="hint">${L('S/U/N', 'W/D/L')}</span><b>${hsRec(st)}</b></div>
+      <div><span class="hint">${L('Siegquote', 'Win rate')}</span><b>${st.k ? Math.round((st.w + st.d / 2) / st.k * 100) + ' %' : '–'}</b></div>
+      <div><span class="hint">Ø ${L('SP', 'VP')}</span><b>${st.k ? Math.round(st.vp / st.k) + ' : ' + Math.round(st.va / st.k) : '–'}</b></div>
+    </div>
+    <p class="hint">${L('Bezieht sich auf die gefilterten Spiele aus deiner Sicht. Orga-Turnierspiele ohne „Ich“ zählen nicht mit (unter „Bearbeiten“ festlegbar).', 'Refers to the filtered games from your point of view. Organised tournament games without “me” are not counted (set under “Edit”).')}</p>
+    ${hsFacTable(arr, 'me')}${hsFacTable(arr, 'opp')}${hsTacStats(arr)}
+    <div class="row-btns"><button class="small" data-hs="csv">⬇ ${L('Als CSV exportieren', 'Export as CSV')}</button></div>
+    <p class="hint">${L('CSV mit allen Spielen (eine Zeile pro Spiel) für Excel oder Numbers.', 'CSV with all games (one row per game) for Excel or Numbers.')}</p>`;
+}
+// ---------- Aktionen ----------
+function hsLists(g) {
+  const blk = (p, j) => `<div class="hs-lst"><h3>${esc(p.name)}${p.faction ? ` <span class="hint">${esc(p.faction)}</span>` : ''}</h3>
+    ${p.listText ? `<pre>${esc(p.listText)}</pre>` : `<p class="hint">${L('Keine Liste gespeichert.', 'No list stored.')}</p>`}
+    ${p.listSnap || p.listText ? `<button class="small" data-hscopy="${j}">${L('Als Liste in den List Builder kopieren', 'Copy into the List Builder')}</button>` : ''}</div>`;
+  openModal(L('Listen des Spiels', 'Lists of the game'), g.p.map(blk).join(''), [{ label: L('Schließen', 'Close'), primary: true }]);
+  document.querySelector('.modal-box').classList.add('wide');
+  document.querySelectorAll('[data-hscopy]').forEach(b => b.onclick = () => {
+    const j = +b.dataset.hscopy, p = g.p[j], me = hsMe(g) === j;
+    let l = p.listSnap && p.listSnap.regiments ? clone(p.listSnap) : null;
+    if (!l && p.listText) { try { l = textToList(p.listText); } catch {} }
+    if (!l) { toast(L('Liste konnte nicht gelesen werden.', 'Could not read the list.')); return; }
+    l.id = uid(); l.role = me ? 'mine' : 'opp'; l.name = `${p.list || p.name} (${hsDate(g.date)})`; l.savedAt = Date.now(); l.updated = Date.now();
+    lists.push(l); ws.bl[sideKey(sideOf(l))] = l.id; ws.bl.side = sideOf(l); saveLists(); ws.view = 'builder'; saveWs();
+    document.querySelector('#modalActions .primary').click(); renderView();
+    toast(L(`„${l.name}“ im List Builder angelegt`, `“${l.name}” created in the List Builder`));
+  });
+}
+function hsEdit(g) {
+  const facs = sharedView().factions.map(f => f.name).sort(), rs = rulesetById(g.rs), tacs = (rs.battleTactics || []).map(t => t.name), plans = (rs.battleplans || []).map(p => p.name), maxT = rs.maxTactics ?? 2;
+  const pl = (p, j) => `<fieldset class="hs-ef"><legend>${L('Spieler', 'Player')} ${j + 1}</legend>
+    <label>${L('Name', 'Name')}<input data-he="name" data-j="${j}" value="${esc(p.name || '')}"></label>
+    <label>${L('Fraktion', 'Faction')}<select data-he="faction" data-j="${j}"><option value="">–</option>${facs.map(f => `<option${f === p.faction ? ' selected' : ''}>${esc(f)}</option>`).join('')}</select></label>
+    <label>${L('Siegpunkte', 'Victory points')}<input type="number" inputmode="numeric" data-he="vp" data-j="${j}" value="${+p.vp || 0}"></label>
+    ${Array.from({ length: maxT }, (_, k) => `<label>Battle Tactic ${k + 1}<select data-he="tac" data-j="${j}"><option value="">–</option>${tacs.map(t => `<option${(p.tactics || [])[k] === t ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select></label>`).join('')}
+  </fieldset>`;
+  openModal(L('Spiel bearbeiten', 'Edit game'), `<div class="hs-edit">${g.p.map(pl).join('')}</div>
+    <label>Battleplan<select id="heplan"><option value="">–</option>${plans.map(n => `<option${n === g.plan ? ' selected' : ''}>${esc(n)}</option>`).join('')}${g.plan && !plans.includes(g.plan) ? `<option selected>${esc(g.plan)}</option>` : ''}</select></label>
+    <label>${L('Ich war', 'I was')}<select id="heme"><option value="0"${hsMe(g) === 0 ? ' selected' : ''}>${esc(g.p[0].name)}</option><option value="1"${hsMe(g) === 1 ? ' selected' : ''}>${esc(g.p[1].name)}</option><option value="x"${hsMe(g) === null ? ' selected' : ''}>${L('nicht beteiligt', 'not involved')}</option></select></label>
+    <label>${L('Datum', 'Date')}<input type="date" id="hedate" value="${new Date(g.date - new Date(g.date).getTimezoneOffset() * 60000).toISOString().slice(0, 10)}"></label>`,
+    [{ label: L('Abbrechen', 'Cancel'), cancel: true }, { label: L('Speichern', 'Save'), primary: true, onClick: () => {
+      document.querySelectorAll('[data-he]').forEach(el => { const p = g.p[+el.dataset.j]; if (el.dataset.he === 'tac') return; p[el.dataset.he] = el.dataset.he === 'vp' ? (+el.value || 0) : el.value; });
+      [0, 1].forEach(j => { g.p[j].tactics = [...document.querySelectorAll(`[data-he="tac"][data-j="${j}"]`)].map(s => s.value).filter(Boolean); });
+      g.plan = document.getElementById('heplan').value; const me = document.getElementById('heme').value; g.me = me === 'x' ? null : +me;
+      const d = document.getElementById('hedate').value; if (d) { const o = new Date(g.date), n = new Date(d + 'T' + o.toTimeString().slice(0, 8)); if (!isNaN(n)) g.date = +n; }
+      g.updated = Date.now(); hsSyncTour(g); gmSaveHist(); renderHist();
+    } }]);
+  document.querySelector('.modal-box').classList.add('wide');
+}
+// Ergebnis eines Spiels im zugehörigen Turnier nachziehen
+function hsSyncTour(g) {
+  if (!g.tour) return; const t = tours.find(x => x.id === g.tour.id); if (!t) return;
+  const pr = (t.rounds[g.tour.round] || { pairings: [] }).pairings.find(p => p.res && p.res.gameId === g.id); if (!pr) return;
+  const m = t.mode === 'self' ? (hsMe(g) ?? 0) : (pr.resA ?? 0);
+  pr.res.vp = [+g.p[m].vp || 0, +g.p[1 - m].vp || 0]; tTouch(t);
+}
+function hsDetachTour(g) {
+  if (!g.tour) return; const t = tours.find(x => x.id === g.tour.id);
+  if (t) t.rounds.forEach(rd => rd.pairings.forEach(p => { if (p.res && p.res.gameId === g.id) p.res = null; })), tTouch(t);
+}
+function hsToTour(g) {
+  const openT = tours.filter(t => t.status !== 'done');
+  const body = () => {
+    const t = tours.find(x => x.id === (document.getElementById('htT') || {}).value) || openT[0]; if (!t) return '';
+    const mi = hsMe(g) ?? 0;
+    if (t.mode === 'self') {
+      const free = t.rounds.map((rd, r) => [rd, r]).filter(([rd]) => !rd.pairings[0].res || rd.pairings[0].res.gameId === g.id);
+      return `<label>${L('Runde', 'Round')}<select id="htR">${free.map(([rd, r]) => `<option value="${r}">${L('Runde', 'Round')} ${r + 1}${tP(t, rd.pairings[0].b) && tP(t, rd.pairings[0].b).name ? ' – ' + esc(tP(t, rd.pairings[0].b).name) : ''}</option>`).join('')}<option value="new">${L('Neue Runde anhängen', 'Append new round')}</option></select></label>
+        <label>${L('Ich war', 'I was')}<select id="htMe"><option value="0"${mi === 0 ? ' selected' : ''}>${esc(g.p[0].name)}</option><option value="1"${mi === 1 ? ' selected' : ''}>${esc(g.p[1].name)}</option></select></label>`;
+    }
+    const opts = t.rounds.flatMap((rd, r) => rd.pairings.map((pr, i) => [rd, r, pr, i])).filter(([, , pr]) => pr.b !== null && pr.a && pr.b && (!pr.res || pr.res.gameId === g.id));
+    const guess = pr => { const n = x => String(x || '').trim().toLowerCase(); return n(tName(t, pr.a)) === n(g.p[1].name) || n(tName(t, pr.b)) === n(g.p[0].name) ? 1 : 0; };
+    return opts.length ? `<label>${L('Paarung', 'Pairing')}<select id="htP">${opts.map(([, r, pr, i]) => `<option value="${r}|${pr.id}" data-guess="${guess(pr)}">${L('Runde', 'Round')} ${r + 1}, ${L('Tisch', 'table')} ${i + 1}: ${esc(tName(t, pr.a))} vs ${esc(tName(t, pr.b))}</option>`).join('')}</select></label>
+      <label>${L('Erster Spieler der Paarung ist', 'First player of the pairing is')}<select id="htA"><option value="0">${esc(g.p[0].name)}</option><option value="1">${esc(g.p[1].name)}</option></select></label>`
+      : `<p class="hint">${L('In diesem Turnier gibt es keine offene Paarung. Erst Paarungen anlegen.', 'This tournament has no open pairing. Create pairings first.')}</p>`;
+  };
+  openModal(L('In Turnier übernehmen', 'Add to tournament'), `<label>${L('Turnier', 'Tournament')}<select id="htT">${openT.map(t => `<option value="${t.id}">${t.mode === 'self' ? '🎯' : '👥'} ${esc(t.name)}</option>`).join('')}</select></label><div id="htBody">${body()}</div>`,
+    [{ label: L('Abbrechen', 'Cancel'), cancel: true }, { label: L('Übernehmen', 'Add'), primary: true, onClick: () => {
+      const t = tours.find(x => x.id === document.getElementById('htT').value); if (!t) return;
+      const prevTour = g.tour ? { ...g.tour } : null; let r, pr, m;
+      if (t.mode === 'self') {
+        const rv = document.getElementById('htR').value; m = +document.getElementById('htMe').value;
+        if (rv === 'new') { t.rounds.push(tSelfRound(t)); t.nRounds = t.rounds.length; r = t.rounds.length - 1; } else r = +rv;
+        pr = t.rounds[r].pairings[0];
+        const opp = tP(t, pr.b), me = tP(t, t.me), go = g.p[1 - m], gm = g.p[m];
+        Object.assign(opp, { name: go.name, faction: go.faction || opp.faction, listName: go.list || '', listText: go.listText || '', listSnap: go.listSnap || null, tactics: go.tactics || [] });
+        if (!me.faction) Object.assign(me, { faction: gm.faction || '', listName: gm.list || '', listText: gm.listText || '', listSnap: gm.listSnap || null, tactics: gm.tactics || [] });
+        g.me = m;
+      } else {
+        const sel = document.getElementById('htP'); if (!sel) return false;
+        const [rv, pid] = sel.value.split('|'); r = +rv; pr = t.rounds[r].pairings.find(p => p.id === pid); m = +document.getElementById('htA').value; pr.resA = m;
+      }
+      if (prevTour && !(prevTour.id === t.id && prevTour.round === r)) hsDetachTour(g);
+      if (pr.res && pr.res.gameId && pr.res.gameId !== g.id) { const old = games.find(x => x.id === pr.res.gameId); if (old && old.quick) games = games.filter(x => x !== old); else if (old) delete old.tour; }
+      if (!t.rounds[r].plan && g.plan) t.rounds[r].plan = g.plan;
+      pr.res = { vp: [+g.p[m].vp || 0, +g.p[1 - m].vp || 0], gameId: g.id, mode: g.detail ? 'tracker' : 'quick' };
+      g.tour = { id: t.id, name: t.name, round: r }; g.kind = t.mode === 'self' ? 'tour-self' : 'tour-orga'; g.updated = Date.now();
+      tTouch(t); gmSaveHist(); renderHist(); toast(L(`Spiel in „${t.name}“, Runde ${r + 1} übernommen`, `Game added to “${t.name}”, round ${r + 1}`));
+    } }]);
+  const upd = () => { document.getElementById('htBody').innerHTML = body(); const p = document.getElementById('htP'), a = document.getElementById('htA'); if (p && a) { const s = () => { a.value = p.selectedOptions[0].dataset.guess; }; p.onchange = s; s(); } };
+  document.getElementById('htT').onchange = upd; upd();
+}
+function hsCsv() {
+  const cols = ['Datum', 'Art', 'Turnier', 'Turnierrunde', 'Battleplan', 'Regelwerk', 'Saison', 'Datenstand', 'Ich', 'Ergebnis',
+    'Spieler1', 'Fraktion1', 'Liste1', 'Punkte1', 'Formation1', 'Rolle1', 'SP1', 'Tactics1', 'Erfüllt1',
+    'Spieler2', 'Fraktion2', 'Liste2', 'Punkte2', 'Formation2', 'Rolle2', 'SP2', 'Tactics2', 'Erfüllt2',
+    ...[1, 2, 3, 4, 5].flatMap(r => [`R${r}_SP1`, `R${r}_SP2`, `R${r}_Zuerst`]), 'Dauer_min', 'Notizen'];
+  const q = v => { const s = v == null ? '' : String(v); return /[";\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  const rows = games.slice().sort((a, b) => a.date - b.date).map(g => { const m = hsMe(g), pl = j => { const p = g.p[j]; return [p.name, p.faction, p.list, p.points || '', p.formation || '', p.role || (g.att === j ? 'att' : g.att != null ? 'def' : ''), +p.vp || 0, (p.tactics || []).join(' | '), (p.tacDone || []).map(t => `${t.card} R${t.round}`).join(' | ')]; };
+    return [new Date(g.date).toISOString().slice(0, 16).replace('T', ' '), g.tour ? 'Turnier' : 'Freundschaftsspiel', g.tour ? g.tour.name : '', g.tour ? g.tour.round + 1 : '', g.plan, g.rsName || g.rs || '', g.season || '', g.dataVer || '', m === null ? '' : g.p[m].name, { w: 'S', d: 'U', l: 'N' }[hsOut(g)] || '',
+      ...pl(0), ...pl(1), ...[0, 1, 2, 3, 4].flatMap(r => g.rounds && g.rounds[r] ? [g.rounds[r][0], g.rounds[r][1], g.detail && g.detail[r] && g.detail[r].first != null ? g.p[g.detail[r].first].name : ''] : ['', '', '']),
+      g.ended && g.ended > g.date ? Math.round((g.ended - g.date) / 60000) : '', g.notes || ''].map(q).join(';'); });
+  offerFile(`AoS-Spiele-${new Date().toISOString().slice(0, 10)}.csv`, '﻿' + [cols.join(';'), ...rows].join('\r\n'));
+}
+hsEl('histView').addEventListener('click', async e => {
+  const sum = e.target.closest('details.hs-game > summary');
+  if (sum) { e.preventDefault(); const id = sum.parentElement.dataset.gid; ws.hs.open = ws.hs.open === id ? '' : id; saveWs(); renderHist(); return; }
+  const b = e.target.closest('[data-hs]'); if (!b) return;
+  const k = b.dataset.hs, gEl = b.closest('[data-gid]'), g = gEl ? games.find(x => x.id === gEl.dataset.gid) : null;
+  if (k === 'reset') { Object.assign(ws.hs, { q: '', res: '', kind: '', fac: '', ofac: '' }); saveWs(); renderHist(); }
+  else if (k === 'csv') hsCsv();
+  else if (!g) return;
+  else if (k === 'lists') hsLists(g);
+  else if (k === 'edit') hsEdit(g);
+  else if (k === 'toTour') hsToTour(g);
+  else if (k === 'openTour') { ws.tour.cur = g.tour.id; const t = tours.find(x => x.id === g.tour.id); if (t) t.view.round = g.tour.round; ws.view = 'tour'; saveWs(); renderView(); }
+  else if (k === 'del') { if (!(await askConfirm(L('Dieses Spiel endgültig löschen?', 'Delete this game permanently?') + (g.tour ? ' ' + L('Das Ergebnis wird auch aus dem Turnier entfernt.', 'The result is also removed from the tournament.') : ''), L('Löschen', 'Delete')))) return; hsDetachTour(g); games = games.filter(x => x !== g); gmSaveHist(); renderHist(); }
+});
+hsEl('histView').addEventListener('input', e => { if (e.target.dataset.hsIn === 'q') { ws.hs.q = e.target.value; saveWs(); clearTimeout(hsEl.t); hsEl.t = setTimeout(() => { renderHist(); const i = document.querySelector('[data-hs-in="q"]'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 300); } });
+hsEl('histView').addEventListener('change', e => {
+  const k = e.target.dataset.hsIn; if (!k || k === 'q') return;
+  if (k === 'notes') { const g = games.find(x => x.id === e.target.closest('[data-gid]').dataset.gid); if (g) { g.notes = e.target.value; g.updated = Date.now(); gmSaveHist(); } return; }
+  ws.hs[k] = e.target.value; saveWs(); renderHist();
+});
 
 // ================= Cloud-Sync (optional, nur auf der eigenen Adresse) =================
 // Lokal zuerst: alles bleibt im Browser gespeichert; nach Google-Anmeldung werden Listen, Spiele, laufendes Spiel und
