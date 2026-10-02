@@ -411,6 +411,28 @@ header { position: relative; }
   .tr-prow { padding-bottom: 8px; border-bottom: 1px solid var(--line); }
   #viewSeg button { padding: 5px 8px; font-size: 14px; }
 }
+/* Turnier selbst mitspielen */
+.tr-modes { display: flex; flex-direction: column; gap: 8px; }
+.tr-mode { display: flex; flex-direction: column; align-items: flex-start; text-align: left; gap: 2px; padding: 10px 12px; }
+.tr-mode:hover { border-color: var(--accent); }
+.ts-me { display: grid; grid-template-columns: 1fr 1.4fr 1fr; gap: 8px; margin: 8px 0 12px; }
+.ts-sum { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+.ts-sum > div { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px; }
+.ts-sum b { font-size: 20px; font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 4px; }
+.ts-sum input { width: 3.2em; font-size: 16px; padding: 3px 4px; text-align: center; }
+.ts-rounds { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
+.ts-round { border: 1px solid var(--line); border-left: 4px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.ts-round.win { border-left-color: var(--accent); }
+.ts-round.loss { border-left-color: var(--ga-chaos); }
+.ts-round.draw { border-left-color: var(--muted); }
+.ts-rhead { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
+.ts-res { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.ts-badge { font-size: 12px; font-weight: 600; padding: 1px 7px; border-radius: 10px; background: var(--grid); border: 1px solid var(--line); margin-left: 4px; }
+.ts-round.win .ts-badge { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+.ts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; }
+.ts-pl { display: flex; gap: 6px; } .ts-pl select { flex: 1; min-width: 0; }
+.ts-act { justify-content: flex-start; margin-top: 8px; }
+@media (max-width: 700px) { .ts-me, .ts-grid { grid-template-columns: 1fr; } .ts-sum b { font-size: 17px; } }
 </style>
 </head>
 <body>
@@ -3956,7 +3978,7 @@ function tSwiss(t, r) {
 function tGameRecord(t, r, pr, vp) {
   const pl = [tP(t, pr.a), tP(t, pr.b)];
   return { id: uid(), date: Date.now(), updated: Date.now(), rs: t.rs, plan: t.rounds[r].plan || '', quick: true,
-    p: pl.map((p, j) => ({ name: p ? p.name : '?', faction: p ? p.faction : '', list: p ? p.listName : '', listText: p ? p.listText : '', tactics: p ? p.tactics : [], vp: +vp[j] || 0 })),
+    p: pl.map((p, j) => ({ name: p && p.name ? p.name : (j ? L('Gegner', 'Opponent') : '?'), faction: p ? p.faction : '', list: p ? p.listName : '', listText: p ? p.listText : '', tactics: p ? p.tactics : [], vp: +vp[j] || 0 })),
     tour: { id: t.id, name: t.name, round: r } };
 }
 function tourResultFromGame(ref, rec) {
@@ -3970,7 +3992,7 @@ function tourResultFromGame(ref, rec) {
 function tQuickResult(t, r, pr) {
   const a = tP(t, pr.a), b = tP(t, pr.b), v = (pr.res && pr.res.vp) || ['', ''];
   openModal(L('Ergebnis eintragen', 'Enter result'), `<p>${L('Runde', 'Round')} ${r + 1}${t.rounds[r].plan ? ' · ' + esc(t.rounds[r].plan) : ''}</p>
-    <div class="tr-quick"><label>${esc(a ? a.name : '?')}<input type="number" inputmode="numeric" id="tqA" value="${esc(v[0])}" min="0"></label><span>:</span><label>${esc(b ? b.name : '?')}<input type="number" inputmode="numeric" id="tqB" value="${esc(v[1])}" min="0"></label></div>
+    <div class="tr-quick"><label>${esc(a && a.name ? a.name : '?')}<input type="number" inputmode="numeric" id="tqA" value="${esc(v[0])}" min="0"></label><span>:</span><label>${esc(b && b.name ? b.name : L('Gegner', 'Opponent'))}<input type="number" inputmode="numeric" id="tqB" value="${esc(v[1])}" min="0"></label></div>
     <p class="hint">${L('Siegpunkte am Spielende. Für Runden, Tactics und Befehlspunkte das Spiel stattdessen mit dem Spielbegleiter erfassen.', 'Victory points at the end of the game. To record rounds, tactics and command points, use the game tracker instead.')}</p>`,
     [{ label: L('Abbrechen', 'Cancel'), cancel: true }, { label: L('Speichern', 'Save'), primary: true, onClick: () => {
       const x = document.getElementById('tqA').value, y = document.getElementById('tqB').value;
@@ -3990,14 +4012,14 @@ async function tPlayTracker(t, r, pr) {
   const g = gmNew(), rs = rulesetById(t.rs), maxT = rs.maxTactics ?? 2;
   g.rs = t.rs; g.plan = t.rounds[r].plan || ''; g.open = { setup: false };
   g.p = [pr.a, pr.b].map(id => { const p = tP(t, id) || {}; const l = lists.find(x => x.id === p.listId);
-    return { name: p.name || '?', listId: l ? l.id : '', listName: p.listName || '', listText: p.listText || '', faction: p.faction || '', tactics: (p.tactics || []).slice(0, maxT), fury: 0 }; });
+    return { name: p.name || (id === pr.b ? L('Gegner', 'Opponent') : '?'), listId: l ? l.id : '', listName: p.listName || '', listText: p.listText || '', faction: p.faction || '', tactics: (p.tactics || []).slice(0, maxT), fury: 0 }; });
   g.tour = { id: t.id, name: t.name, round: r, pairing: pr.id };
   game = g; gmSave(); ws.view = 'game'; saveWs(); renderView();
 }
 // ---------- Darstellung ----------
 function tSideHtml() {
   const open = tours.filter(t => t.status !== 'done').sort((a, b) => b.updated - a.updated), done = tours.filter(t => t.status === 'done').sort((a, b) => b.created - a.created);
-  const row = t => `<button class="tr-item${ws.tour.cur === t.id ? ' on' : ''}" data-tr="open" data-id="${t.id}"><b>${esc(t.name)}</b><span class="hint">${tDate(t.created)} · ${t.players.length} ${L('Spieler', 'players')} · ${t.status === 'done' ? L('abgeschlossen', 'finished') : L('Runde', 'round') + ' ' + Math.max(1, t.rounds.length) + '/' + t.nRounds}</span></button>`;
+  const row = t => `<button class="tr-item${ws.tour.cur === t.id ? ' on' : ''}" data-tr="open" data-id="${t.id}"><b>${t.mode === 'self' ? '🎯' : '👥'} ${esc(t.name)}</b><span class="hint">${tDate(t.created)} · ${t.mode === 'self' ? tSelfLine(t) : `${t.players.length} ${L('Spieler', 'players')} · ${t.status === 'done' ? L('abgeschlossen', 'finished') : L('Runde', 'round') + ' ' + Math.max(1, t.rounds.length) + '/' + t.nRounds}`}</span></button>`;
   return `<div class="panel-head"><h2>${L('Turniere', 'Tournaments')}</h2></div>
     <button class="small primary" data-tr="new">+ ${L('Neues Turnier', 'New tournament')}</button>
     ${open.length ? `<h3>${L('Laufend', 'Running')}</h3><div class="tr-list">${open.map(row).join('')}</div>` : ''}
@@ -4062,6 +4084,7 @@ function tTableHtml(t) {
   </tbody></table></div><p class="hint">${t.scoring === 'vp' ? L('Wertung: Siegpunkte, dann Differenz.', 'Scoring: victory points, then difference.') : L('Wertung: Siege (Unentschieden = ½), dann Siegpunkte-Differenz, dann Stärke der Gegner (SoS).', 'Scoring: wins (draw = ½), then VP difference, then strength of schedule (SoS).')}${st.some(s => s.byes) ? ' ' + L('* inkl. Freilos.', '* incl. bye.') : ''}</p>`;
 }
 function tResultText(t) {
+  if (t.mode === 'self') return tSelfText(t);
   const st = tStandings(t);
   const lines = [`${t.name} (${tDate(t.created)})${t.status === 'done' ? '' : ' – ' + L('läuft', 'running')}`, ''];
   st.forEach((s, i) => { const p = tP(t, s.id); lines.push(`${i + 1}. ${p ? p.name : '?'}${p && p.faction ? ' (' + p.faction + ')' : ''} – ${s.w}/${s.d}/${s.l}, ${s.vp} ${L('SP', 'VP')}, Diff ${s.diff > 0 ? '+' : ''}${s.diff}`); });
@@ -4074,6 +4097,7 @@ function renderTour() {
   tEl('trSide').innerHTML = tSideHtml();
   const t = tCur();
   if (!t) { tEl('trMain').innerHTML = `<div class="panel-head"><h2>${L('Turnier', 'Tournament')}</h2></div><p class="hint">${L('Links ein Turnier wählen oder ein neues anlegen.', 'Pick a tournament on the left or create a new one.')}</p>`; return; }
+  if (t.mode === 'self') { tEl('trMain').innerHTML = tSelfHtml(t); return; }
   const ro = t.status === 'done', rs = rulesetById(t.rs);
   t.view = t.view || { round: 0 };
   const r = Math.min(t.view.round || 0, Math.max(0, t.rounds.length - 1));
@@ -4100,10 +4124,21 @@ function renderTour() {
 tEl('tourView').addEventListener('click', async e => {
   const b = e.target.closest('[data-tr]'); if (!b) return;
   const k = b.dataset.tr, t = tCur();
-  if (k === 'new') { const n = await askName(L('Neues Turnier', 'New tournament'), L('Turnier ', 'Tournament ') + new Date().toLocaleDateString(LANG === 'en' ? 'en-GB' : 'de-DE')); if (!n) return; const x = tNew(n); tours.push(x); ws.tour.cur = x.id; saveWs(); tTouch(x); renderTour(); return; }
+  if (k === 'new') {
+    const mode = await new Promise(res => openModal(L('Neues Turnier', 'New tournament'), `<p>${L('Was möchtest du machen?', 'What would you like to do?')}</p>
+      <div class="tr-modes"><button class="tr-mode" data-mode="self"><b>🎯 ${L('Selbst mitspielen', 'Play in a tournament')}</b><span class="hint">${L('Eigene Spiele eines Turniers tracken: pro Runde Gegner, Liste, Battleplan und Ergebnis.', 'Track your own games: opponent, list, battleplan and result per round.')}</span></button>
+      <button class="tr-mode" data-mode="orga"><b>👥 ${L('Turnier organisieren', 'Organise a tournament')}</b><span class="hint">${L('Alle Spieler, Paarungen (Schweizer System oder manuell) und Tabelle.', 'All players, pairings (Swiss or manual) and standings.')}</span></button></div>`,
+      [{ label: L('Abbrechen', 'Cancel'), cancel: true, onClick: () => res(null) }]) || setTimeout(() => document.querySelectorAll('.tr-mode').forEach(x => x.onclick = () => { res(x.dataset.mode); document.querySelector('#modalActions button').click(); }), 0));
+    if (!mode) return;
+    const n = await askName(L('Name des Turniers', 'Tournament name'), L('Turnier ', 'Tournament ') + new Date().toLocaleDateString(LANG === 'en' ? 'en-GB' : 'de-DE')); if (!n) return;
+    const x = tNew(n);
+    if (mode === 'self') tSelfInit(x);
+    tours.push(x); ws.tour.cur = x.id; saveWs(); tTouch(x); renderTour(); return;
+  }
   if (k === 'open') { ws.tour.cur = b.dataset.id; saveWs(); renderTour(); return; }
   if (!t) return;
-  const prEl = b.closest('[data-prid]'), pEl = b.closest('[data-pid]'), r = Math.min(t.view.round || 0, Math.max(0, t.rounds.length - 1)), rd = t.rounds[r];
+  const rEl = b.closest('[data-ridx]'), prEl = b.closest('[data-prid]'), pEl = b.closest('[data-pid]'), r = rEl ? +rEl.dataset.ridx : Math.min(t.view.round || 0, Math.max(0, t.rounds.length - 1)), rd = t.rounds[r];
+  if (t.mode === 'self' && tSelfClick(t, k, r, rd, b)) { tTouch(t); renderTour(); return; }
   const pr = prEl && rd ? rd.pairings.find(x => x.id === prEl.dataset.prid) : null, p = pEl ? tP(t, pEl.dataset.pid) : null;
   if (k === 'padd') { t.players.push({ id: uid(), name: L('Spieler ', 'Player ') + (t.players.length + 1), faction: '', listId: '', listName: '', listText: '', tactics: [] }); t.view.players = true; }
   else if (k === 'pdel') { if (t.rounds.some(x => x.pairings.some(q => q.a === p.id || q.b === p.id))) { toast(L('Spieler ist schon gepaart – stattdessen „Aussteigen“ nutzen.', 'Player is already paired – use “drop” instead.')); return; } t.players = t.players.filter(x => x !== p); }
@@ -4130,7 +4165,8 @@ tEl('tourView').addEventListener('click', async e => {
 });
 tEl('tourView').addEventListener('change', e => {
   const el = e.target, k = el.dataset.trIn, t = tCur(); if (!k || !t) return;
-  const r = Math.min(t.view.round || 0, Math.max(0, t.rounds.length - 1)), rd = t.rounds[r];
+  const rEl = el.closest('[data-ridx]'), r = rEl ? +rEl.dataset.ridx : Math.min(t.view.round || 0, Math.max(0, t.rounds.length - 1)), rd = t.rounds[r];
+  if (t.mode === 'self' && tSelfChange(t, k, r, rd, el)) { tTouch(t); renderTour(); return; }
   const pEl = el.closest('[data-pid]'), p = pEl ? tP(t, pEl.dataset.pid) : null, prEl = el.closest('[data-prid]'), pr = prEl && rd ? rd.pairings.find(x => x.id === prEl.dataset.prid) : null;
   if (k === 'name') t.name = el.value.trim() || t.name;
   else if (k === 'nRounds') t.nRounds = +el.value;
@@ -4145,6 +4181,97 @@ tEl('tourView').addEventListener('change', e => {
   else return;
   tTouch(t); renderTour();
 });
+
+// ================= Turnier selbst mitspielen (eigene Spiele tracken) =================
+// Ich = t.me (ein Spieler), pro Runde ein Gegner (eigener Spieler-Eintrag) und eine Paarung ich vs. Gegner.
+function tSelfRound(t) { const o = { id: uid(), name: '', faction: '', listId: '', listName: '', listText: '', tactics: [] }; t.players.push(o); return { plan: '', pairings: [{ id: uid(), a: t.me, b: o.id, res: null }] }; }
+function tSelfInit(t) {
+  t.mode = 'self';
+  const mine = listOfSide('mine', false), me = { id: uid(), name: L('Ich', 'Me'), faction: '', listId: '', listName: '', listText: '', tactics: [] };
+  if (mine) tPlayerFromList(me, mine);
+  t.players = [me]; t.me = me.id; t.rounds = []; t.nRounds = 3; t.place = ''; t.of = ''; t.notes = '';
+  for (let i = 0; i < t.nRounds; i++) t.rounds.push(tSelfRound(t));
+}
+function tSelfStats(t) {
+  const s = { w: 0, d: 0, l: 0, vp: 0, va: 0, played: 0 };
+  t.rounds.forEach(rd => { const pr = rd.pairings[0]; if (!pr || !pr.res || !pr.res.vp) return; const [x, y] = pr.res.vp.map(v => +v || 0); s.played++; s.vp += x; s.va += y; if (x > y) s.w++; else if (y > x) s.l++; else s.d++; });
+  return s;
+}
+function tSelfLine(t) { const s = tSelfStats(t); return `${s.w}/${s.d}/${s.l}${t.place ? ` · ${L('Platz', 'place')} ${t.place}${t.of ? '/' + t.of : ''}` : ''}${t.status === 'done' ? '' : ' · ' + L('läuft', 'running')}`; }
+function tSelfText(t) {
+  const s = tSelfStats(t), me = tP(t, t.me) || {};
+  const lines = [`${t.name} (${tDate(t.created)})`, `${me.name || ''}${me.faction ? ' – ' + me.faction : ''}${me.listName ? ' (' + me.listName + ')' : ''}`,
+    `${L('Bilanz', 'Record')}: ${s.w}/${s.d}/${s.l} · ${s.vp} : ${s.va} ${L('SP', 'VP')}${t.place ? ` · ${L('Platz', 'Place')} ${t.place}${t.of ? ' / ' + t.of : ''}` : ''}`, ''];
+  t.rounds.forEach((rd, r) => { const pr = rd.pairings[0], o = tP(t, pr && pr.b) || {};
+    lines.push(`${L('Runde', 'Round')} ${r + 1}${rd.plan ? ' – ' + rd.plan : ''}: ${L('gegen', 'vs')} ${o.name || L('Unbekannt', 'unknown')}${o.faction ? ' (' + o.faction + ')' : ''} ${pr && pr.res && pr.res.vp ? pr.res.vp[0] + ' : ' + pr.res.vp[1] : '–'}`); });
+  if (t.notes) lines.push('', t.notes);
+  return lines.join('\n');
+}
+function tSelfHtml(t) {
+  const ro = t.status === 'done', rs = rulesetById(t.rs), me = tP(t, t.me) || {}, s = tSelfStats(t);
+  const plans = (rs.battleplans || []).slice().sort((a, b) => a.order - b.order), facs = sharedView().factions.map(f => f.name).sort();
+  const listOpts = (sel, mine) => `<option value="">${L('– keine Liste –', '– no list –')}</option>` + [...lists].sort((a, b) => ((sideOf(a) === 'mine') === mine ? 0 : 1) - ((sideOf(b) === 'mine') === mine ? 0 : 1) || a.name.localeCompare(b.name))
+    .map(l => `<option value="${l.id}"${sel === l.id ? ' selected' : ''}>${esc(l.name)}${l.faction ? ' · ' + esc(l.faction) : ''}</option>`).join('');
+  const facSel = (p, k, dis) => `<select data-tr-in="${k}"${dis ? ' disabled' : ''}><option value="">${L('– Fraktion –', '– faction –')}</option>${facs.map(f => `<option${f === p.faction ? ' selected' : ''}>${esc(f)}</option>`).join('')}</select>`;
+  const rounds = t.rounds.map((rd, r) => {
+    const pr = rd.pairings[0], o = tP(t, pr.b) || {}, res = pr.res && pr.res.vp ? pr.res.vp : null, w = res ? (res[0] > res[1] ? 'win' : res[0] < res[1] ? 'loss' : 'draw') : '';
+    return `<div class="ts-round ${w}" data-ridx="${r}" data-prid="${pr.id}">
+      <div class="ts-rhead"><b>${L('Runde', 'Round')} ${r + 1}</b>${res ? `<span class="ts-res">${res[0]} : ${res[1]} <span class="ts-badge">${{ win: L('Sieg', 'Win'), loss: L('Niederlage', 'Loss'), draw: L('Unentschieden', 'Draw') }[w]}</span>${pr.res.mode === 'tracker' ? ' 📋' : ''}</span>` : `<span class="hint">${L('offen', 'open')}</span>`}</div>
+      <div class="ts-grid">
+        <label>Battleplan<span class="ts-pl"><select data-tr-in="splan"${ro ? ' disabled' : ''}><option value="">–</option>${plans.map(p => `<option value="${esc(p.name)}"${p.name === rd.plan ? ' selected' : ''}>${p.order}. ${esc(p.name)}</option>`).join('')}</select>${ro ? '' : `<button class="small" data-tr="sroll" title="${L('Zufällig', 'Random')}">🎲</button>`}</span></label>
+        <label>${L('Gegner', 'Opponent')}<input data-tr-in="oname" value="${esc(o.name || '')}" placeholder="${L('Name', 'Name')}"${ro ? ' disabled' : ''}></label>
+        <label>${L('Liste des Gegners', 'Opponent’s list')}<select data-tr-in="olist"${ro ? ' disabled' : ''}>${listOpts(o.listId, false)}</select></label>
+        <label>${L('Fraktion', 'Faction')}${facSel(o, 'ofac', ro || !!o.listId)}</label>
+      </div>
+      ${ro ? '' : `<div class="tr-act ts-act">
+        <button class="small" data-tr="play">▶ ${L('Spielbegleiter', 'Tracker')}</button>
+        <button class="small" data-tr="quick">${res ? L('Ergebnis ändern', 'Edit result') : L('Ergebnis eintragen', 'Enter result')}</button>
+        ${res ? `<button class="icon" data-tr="prclear" title="${L('Ergebnis löschen', 'Clear result')}">↺</button>` : (t.rounds.length > 1 ? `<button class="icon" data-tr="sdel" title="${L('Runde entfernen', 'Remove round')}">✕</button>` : '')}
+      </div>`}
+    </div>`; }).join('');
+  return `<div class="panel-head tr-head">
+      ${ro ? `<h2>🎯 ${esc(t.name)}</h2>` : `<input class="tr-title" data-tr-in="name" value="${esc(t.name)}" aria-label="${L('Name des Turniers', 'Tournament name')}">`}
+      <span class="tag ${ro ? '' : 'open'}">${ro ? L('abgeschlossen', 'finished') : L('läuft', 'running')}</span></div>
+    <div class="ts-me">
+      <label>${L('Mein Name', 'My name')}<input data-tr-in="mename" value="${esc(me.name || '')}"${ro ? ' disabled' : ''}></label>
+      <label>${L('Meine Liste', 'My list')}<select data-tr-in="melist"${ro ? ' disabled' : ''}>${listOpts(me.listId, true)}</select></label>
+      <label>${L('Fraktion', 'Faction')}${facSel(me, 'mefac', ro || !!me.listId)}</label>
+    </div>
+    <div class="ts-sum">
+      <div><span class="hint">${L('Bilanz', 'Record')}</span><b>${s.w}/${s.d}/${s.l}</b></div>
+      <div><span class="hint">${L('Siegpunkte', 'Victory points')}</span><b>${s.vp} : ${s.va}</b></div>
+      <div><span class="hint">${L('Platzierung', 'Placing')}</span><b><input data-tr-in="place" inputmode="numeric" value="${esc(t.place || '')}" placeholder="–"${ro ? ' disabled' : ''}> / <input data-tr-in="of" inputmode="numeric" value="${esc(t.of || '')}" placeholder="${L('von', 'of')}"${ro ? ' disabled' : ''}></b></div>
+    </div>
+    <div class="ts-rounds">${rounds}</div>
+    ${ro ? '' : `<div class="row-btns"><button class="small" data-tr="sadd">+ ${L('Runde', 'Round')}</button></div>`}
+    <label>${L('Notizen', 'Notes')}<textarea data-tr-in="notes" rows="3"${ro ? ' disabled' : ''} placeholder="${L('z. B. Erkenntnisse, Turnierpaket, Sonderregeln …', 'e.g. lessons learned, tournament pack, special rules …')}">${esc(t.notes || '')}</textarea></label>
+    <div class="row-btns tr-foot">
+      ${ro ? `<button class="small" data-tr="reopen">${L('Wieder öffnen', 'Re-open')}</button>` : `<button class="small primary" data-tr="finish">${L('Turnier abschließen', 'Finish tournament')}</button>`}
+      <button class="small" data-tr="text">${L('Ergebnisse als Text', 'Results as text')}</button>
+      <button class="small" data-tr="del">${L('Turnier löschen', 'Delete tournament')}</button>
+    </div>`;
+}
+function tSelfClick(t, k, r, rd, b) {
+  if (k === 'sadd') { t.rounds.push(tSelfRound(t)); t.nRounds = t.rounds.length; return true; }
+  if (k === 'sdel') { const pr = rd.pairings[0]; t.players = t.players.filter(p => p.id !== pr.b); t.rounds.splice(r, 1); t.nRounds = t.rounds.length; return true; }
+  if (k === 'sroll') { const ps = rulesetById(t.rs).battleplans || []; if (ps.length) rd.plan = ps[Math.floor(Math.random() * ps.length)].name; return true; }
+  return false;
+}
+function tSelfChange(t, k, r, rd, el) {
+  const me = tP(t, t.me), o = rd ? tP(t, rd.pairings[0].b) : null;
+  if (k === 'mename') me.name = el.value.trim() || me.name;
+  else if (k === 'melist') tPlayerFromList(me, lists.find(l => l.id === el.value));
+  else if (k === 'mefac') me.faction = el.value;
+  else if (k === 'oname') o.name = el.value.trim();
+  else if (k === 'olist') { tPlayerFromList(o, lists.find(l => l.id === el.value)); }
+  else if (k === 'ofac') o.faction = el.value;
+  else if (k === 'splan') rd.plan = el.value;
+  else if (k === 'place') t.place = el.value.trim();
+  else if (k === 'of') t.of = el.value.trim();
+  else if (k === 'notes') t.notes = el.value;
+  else return false;
+  return true;
+}
 
 // ================= Cloud-Sync (optional, nur auf der eigenen Adresse) =================
 // Lokal zuerst: alles bleibt im Browser gespeichert; nach Google-Anmeldung werden Listen, Spiele, laufendes Spiel und
